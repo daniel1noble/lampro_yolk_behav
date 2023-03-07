@@ -1,103 +1,113 @@
-#lizard performance and behavious as effect of incubation temperature and maternal effects
+#########################################################
+# lizard performance and behavious as effect of incubation 
+# temperature and maternal effects
+#########################################################
 
-dat<-read.csv( "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/dataset_reclean.csv")
-str(dat)
-dat$time_tohide<-as.numeric(dat$Time_hide_sec)  
-dat$time_hiding<-as.numeric(dat$Time_snout_sec)
-dat$time_active<-as.numeric(dat$Time_emerge_sec)
-dat$temp<-as.factor(dat$temp)  
-dat$maternal<-as.factor(dat$egg_treat)
-dat$sp<-as.factor(dat$sp)
-str(dat)
+## Load Packages
+  pacman::p_load(rptR, brms, bayestestR, tidyverse)  
 
-hist(dat$Distance.moved)#one outlier
-shapiro.test(dat$Distance.moved)
-hist(dat$time_tohide)#one clear outlier
-hist(dat$time_hiding)
-hist(dat$time_active)
+## Load Data
+  dat<-read.csv( "./data/dataset_reclean.csv")
 
-unique(length (dat$id))
+## Data cleaning and organisation
+  str(dat)
+  dat$time_tohide<-as.numeric(dat$Time_hide_sec)  
+  dat$time_hiding<-as.numeric(dat$Time_snout_sec)
+  dat$time_active<-as.numeric(dat$Time_emerge_sec)
+  dat$temp<-as.factor(dat$temp)  
+  dat$maternal<-as.factor(dat$egg_treat)
+  dat$sp<-as.factor(dat$sp)
+  str(dat)
 
-##checking repeatibility of behaviour responses before removing weird numbers 
-#(weird numbers in terms of antipredation are those lonerg than 90 min or 5400sec)
+  hist(dat$Distance.moved)#one outlier
+  shapiro.test(dat$Distance.moved)
+  hist(dat$time_tohide)#one clear outlier
+  hist(dat$time_hiding)
+  hist(dat$time_active)
 
-#first take out animals without intact tail
+  unique(length (dat$id))
 
-dim(dat)
-dat1<-dat[!(dat$Tail_intact=="No"),]
-dim(dat1)#removed 15 lines, so 5 animals
+  ##checking repeatibility of behaviour responses before removing weird numbers 
+  #(weird numbers in terms of antipredation are those lonerg than 90 min or 5400sec)
 
-#delicata
+  #first take out animals without intact tail
 
-dim(dat1)
-dat2<-dat1[!(dat1$sp=="Guich"),]
-dim(dat2)
-#dattrial<-dat2[!(dat2$speed_1m_s>30),]
-#dim(dattrial)
+  dim(dat)
+  dat1<-dat[!(dat$Tail_intact=="No"),]
+  dim(dat1)#removed 15 lines, so 5 animals
 
-#guich
-dim(dat1)
-dat3<-dat1[!(dat1$sp=="Deli"),]
-dim(dat3)
+  #delicata
 
-library(rptR)
-repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat1, 
-              datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs)
+  dim(dat1)
+  dat2<-dat1[!(dat1$sp=="Guich"),]
+  dim(dat2)
+  #dattrial<-dat2[!(dat2$speed_1m_s>30),]
+  #dim(dattrial)
 
-repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat1, 
-                 datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs1)
+  #guich
+  dim(dat1)
+  dat3<-dat1[!(dat1$sp=="Deli"),]
+  dim(dat3)
 
-repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat1, 
-                 datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs2)
+## Repeatability
+  repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat1, 
+                datatype = "Gaussian", nboot = 1000, npermut = 0)
+  print(repbehavs)
 
-repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat1, 
+  repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat1, 
                   datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs3)
+  print(repbehavs1)
 
-#one by one
-#deli
-repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat2, 
-                 datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs)
-
-repsprint <- rpt(burst_25cm ~ (1 | id), grname = "id", data = dat2, 
-                 datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs)
-
-repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat2, 
+  repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat1, 
                   datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs1)
+  print(repbehavs2)
 
-repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat2, 
+  repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat1, 
+                    datatype = "Gaussian", nboot = 1000, npermut = 0)
+  print(repbehavs3)
+
+  #one by one
+  #deli
+  repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat2, 
                   datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs2)
+  print(repbehavs)
 
-repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat2, 
+  repsprint <- rpt(burst_25cm ~ (1 | id), grname = "id", data = dat2, 
                   datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs3)
-#gouch
-repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat3, 
-                 datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs)
+  print(repbehavs)
 
-repsprint <- rpt(burst_25cm ~ (1 | id), grname = "id", data = dat3, 
-                 datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs)
+  repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat2, 
+                    datatype = "Gaussian", nboot = 1000, npermut = 0)
+  print(repbehavs1)
 
-repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat3, 
+  repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat2, 
+                    datatype = "Gaussian", nboot = 1000, npermut = 0)
+  print(repbehavs2)
+
+  repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat2, 
+                    datatype = "Gaussian", nboot = 1000, npermut = 0)
+  print(repbehavs3)
+  #gouch
+  repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat3, 
                   datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs1)
+  print(repbehavs)
 
-repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat3, 
+  repsprint <- rpt(burst_25cm ~ (1 | id), grname = "id", data = dat3, 
                   datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs2)
+  print(repbehavs)
 
-repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat3, 
-                  datatype = "Gaussian", nboot = 1000, npermut = 0)
-print(repbehavs3)
+  repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat3, 
+                    datatype = "Gaussian", nboot = 1000, npermut = 0)
+  print(repbehavs1)
+
+  repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat3, 
+                    datatype = "Gaussian", nboot = 1000, npermut = 0)
+  print(repbehavs2)
+
+  repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat3, 
+                    datatype = "Gaussian", nboot = 1000, npermut = 0)
+  print(repbehavs3)
+
 
 #Note: all values quite repeatable so can do the analyses with means or with animal ID as random
 #I might check both for a couple of variables to see whether the results are similar
@@ -398,8 +408,6 @@ hist(dat3$Time_emerge_sec)
 hist(mean3$mean_tohide)
 hist(dat3$Time_hide_sec)
 
-
-
 #mean
 #deli
 mactivity<-lm(mean_dist~temp*maternal+svldelimean, data=mean2)
@@ -558,11 +566,20 @@ hist(residuals(memerge1g))
 shapiro.test(residuals(memerge1g))
 summary (memerge1g)
 
-
-
 ####################################
-###########figures################
+# Bayesian Multivariate models
+####################################
 
+# Repeatability
+    # Delicata
+        dat2
+
+    # Guichenoti
+        dat3
+        
+####################################
+########### Figures ################
+####################################
 #morphol deli
 pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/taildeli.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean2, aes(x=temp, y=Tail, fill = maternal)) + 
