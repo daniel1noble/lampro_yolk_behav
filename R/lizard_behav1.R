@@ -207,243 +207,12 @@ summary(mveldel3)
 #plot(mveldel1)#much better without outliers.  
 
 
-#trying with average numbers since might be less extreme# USE THIS FOR MAIN TEXT
-
-mean<-read.csv("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/average_all.csv")
-str(mean)
-
-mean$mean_dist<-as.numeric(mean$mean_dist)
-mean$temp<-as.factor(mean$temp)  
-mean$maternal<-as.factor(mean$egg_treat)
-mean$sp<-as.factor(mean$sp)
-mean$mean_tohide<-as.numeric(mean$mean_tohide)
-
-dim(mean)
-mean1<-mean[!(mean$Tail_intact=="No"),]
-dim(mean1)#removed 5 animals
-
-table(paste(mean1$maternal, mean1$temp, mean1$sp))
-
-hist(mean1$mean_dist)
-hist(mean1$mean_snout)
-hist(mean1$mean_emerge)
-hist(log(mean1$mean_1m))
-hist(log(mean1$mean_25cm))
-
-#deli
-mean2<-mean1[!(mean1$sp=="Guich"),]
-
-
-mmeanveldel<-lm(log(mean_1m)~temp*maternal+svldelimean, data=mean2)
-hist(residuals(mmeanveldel))
-shapiro.test(residuals(mmeanveldel))#not super good so try boxcox
-summary(mmeanveldel)
-
-
-library(car)
-powerTransform(mean2$mean_1m)
-mean2$bxcx1mdeli<-bcPower(mean2$mean_1m, -0.9150967)
-hist(mean2$bxcx1mdeli)
-
-mean2$maternal <- relevel(mean2$maternal, ref = "control")
-
-mmeanveldel1<-lm(bxcx1mdeli~temp*maternal+svldelimean, data=mean2)
-hist(residuals(mmeanveldel1))
-shapiro.test(residuals(mmeanveldel1))
-#plot(mmeanveldel1)
-summary(mmeanveldel1)#no interaction. Simplify model. For ms
-Anova(mmeanveldel1, 3)
-
-mmeanveldel2<-lm(bxcx1mdeli~temp+maternal+svldelimean, data=mean2)
-hist(residuals(mmeanveldel2))
-shapiro.test(residuals(mmeanveldel2))
-summary(mmeanveldel2)
-boxplot(bxcx1mdeli~maternal, data=mean2)#ablated take longer to run a meter. For ms
-
-mmeanveldel3<-lm(log(mean_25cm)~temp*maternal+svldelimean, data=mean2)
-hist(residuals(mmeanveldel3))
-shapiro.test(residuals(mmeanveldel3))
-summary(mmeanveldel3)#not normal, use bxcxc
-
-powerTransform(mean2$mean_25cm)
-mean2$bxcx25deli<-bcPower(mean2$mean_25cm, -0.8680516)
-
-mmeanveldel4<-lm(bxcx25deli~temp*maternal+svldelimean, data=mean2)
-hist(residuals(mmeanveldel4))
-shapiro.test(residuals(mmeanveldel4))
-summary(mmeanveldel4)#this for ms
-
-mmeanveldel5<-lm(bxcx25deli~temp+maternal+svldelimean, data=mean2)
-hist(residuals(mmeanveldel5))
-shapiro.test(residuals(mmeanveldel5))
-summary(mmeanveldel5)#this for ms
-
-
-#guich
-
-mean3<-mean1[!(mean1$sp=="Deli"),]
-
-
-mmean1mg<-lm(log(mean_1m)~temp*maternal+svlguichmean, data=mean3)
-hist(residuals(mmean1mg))
-shapiro.test(residuals(mmean1mg))#not super good so try boxcox
-summary(mmean1mg)
-
-powerTransform(mean3$mean_1m)
-mean3$bxcx1guich<-bcPower(mean3$mean_1m, -0.9131911)
-
-mmean1mg1<-lm(bxcx1guich~temp*maternal+svlguichmean, data=mean3)
-hist(residuals(mmean1mg1))
-shapiro.test(residuals(mmean1mg1))
-summary(mmean1mg1)#no 2-way
-
-mmean1mg1red<-lm(bxcx1guich~temp+maternal+svlguichmean, data=mean3)
-hist(residuals(mmean1mg1red))
-shapiro.test(residuals(mmean1mg1red))
-summary(mmean1mg1red)
-
-mmean25mg<-lm(log(mean_25cm)~temp*maternal+svlguichmean, data=mean3)
-hist(residuals(mmean25mg))
-shapiro.test(residuals(mmean25mg))#not super good so try boxcox
-summary(mmean25mg)
-
-powerTransform(mean3$mean_25cm)
-mean3$bxcx25guich<-bcPower(mean3$mean_25cm, -0.8536025)
-
-mmean25mg1<-lm(bxcx25guich~temp*maternal+svlguichmean, data=mean3)
-hist(residuals(mmean25mg1))
-shapiro.test(residuals(mmean25mg1))
-summary(mmean25mg1)#for ms
-
-mmean25mg2<-lm(bxcx25guich~temp+maternal+svlguichmean, data=mean3)
-hist(residuals(mmean25mg2))
-shapiro.test(residuals(mmean25mg2))
-summary(mmean25mg2)#for ms
-
-#Quick checK:does treatment affect morphological traits? in delicata
-
-#scaling age to add as covariate
-mean2$agesacledeli <- scale(mean2$age)
-mean3$agesaclguic <- scale(mean3$age)
-
-mtail<-lm(Tail~temp*maternal+agesacledeli, data=mean2)
-hist(residuals(mtail))
-summary(mtail)#intercation significant
-lsmeans(mtail,pairwise~temp*maternal, adjust = "tukey")
-boxplot(Tail~temp*maternal, data=mean2)
-mtail1<-lm(Tail~temp+maternal+agesacledeli, data=mean2)
-hist(residuals(mtail1))
-summary(mtail1)
-
-mtot<-lm(Total~temp*maternal+agesacledeli, data=mean2)
-hist(residuals(mtot))
-summary(mtot)
-mtot1<-lm(Total~temp+maternal+agesacledeli, data=mean2)
-hist(residuals(mtot1))
-summary(mtot1)
-boxplot(Total~temp, data=mean2)
-
-msvl<-lm(SVL~temp*maternal+agesacledeli, data=mean2)
-hist(residuals(msvl))
-summary(msvl)
-msvl1<-lm(SVL~temp+maternal+agesacledeli, data=mean2)
-hist(residuals(msvl1))
-summary(msvl1)
-boxplot(SVL~temp*maternal, data=mean2)
-
-mmass<-lm(Weigth~temp*maternal+agesacledeli, data=mean2)
-hist(residuals(mmass))
-summary(mmass)
-
-#in guich
-mtail<-lm(Tail~temp*maternal+agesaclguic, data=mean3)
-hist(residuals(mtail))
-summary(mtail)
-mtail1<-lm(Tail~temp+maternal+agesaclguic, data=mean3)
-hist(residuals(mtail1))
-summary(mtail1)
-
-mtot<-lm(Total~temp*maternal+agesaclguic, data=mean3)
-hist(residuals(mtot))
-summary(mtot)
-mtot1<-lm(Total~temp+maternal+agesaclguic, data=mean3)
-hist(residuals(mtot1))
-summary(mtot1)
-boxplot(Total~temp*maternal, data=mean3)
-
-msvl<-lm(SVL~temp*maternal+agesaclguic, data=mean3)
-hist(residuals(msvl))
-summary(msvl)
-msv1<-lm(SVL~temp+maternal+agesaclguic, data=mean3)
-hist(residuals(msv1))
-summary(msv1)
-boxplot(SVL~temp*maternal, data=mean3)
-
-mmass<-lm(Weigth~temp*maternal+agesaclguic, data=mean3)
-hist(residuals(mmass))
-summary(mmass)
-mmass1<-lm(Weigth~temp+maternal+agesaclguic, data=mean3)
-hist(residuals(mmass1))
-summary(mmass1)
 
 
 ### antipredation#########################
 #########################################
 
-hist(mean2$mean_dist)
-hist(dat2$Movement)
-hist(mean2$mean_snout)
-hist(dat2$Time_snout_sec)
-hist(mean2$mean_emerge)
-hist(dat2$Time_emerge_sec)
-hist(log(mean2$mean_tohide))
-hist(log(dat2$Time_hide_sec))
-
-hist(mean3$mean_dist)
-hist(dat3$Movement)
-hist(mean3$mean_snout)
-hist(dat3$Time_snout_sec)
-hist(mean3$mean_emerge)
-hist(dat3$Time_emerge_sec)
-hist(mean3$mean_tohide)
-hist(dat3$Time_hide_sec)
-
-#mean
 #deli
-mactivity<-lm(mean_dist~temp*maternal+svldelimean, data=mean2)
-hist(residuals(mactivity))
-shapiro.test(residuals(mactivity))
-#plot(mactivity)
-summary (mactivity)#no interaction. Simplify model
-
-mactivity1<-lm(mean_dist~temp+maternal+svldelimean, data=mean2)
-hist(residuals(mactivity1))
-shapiro.test(residuals(mactivity1))
-summary (mactivity1)
-
-msnout<-lm(mean_snout~temp*maternal+svldelimean+mean_dist, data=mean2)
-hist(residuals(msnout))
-shapiro.test(residuals(msnout))
-#plot(msnout)
-summary (msnout)#no interaction. Simplify model
-
-msnout1<-lm(mean_snout~temp+maternal+svldelimean+mean_dist, data=mean2)
-hist(residuals(msnout1))
-shapiro.test(residuals(msnout1))
-summary (msnout1)
-
-memerge<-lm(mean_emerge~temp*maternal+svldelimean+mean_dist, data=mean2)
-hist(residuals(memerge))
-shapiro.test(residuals(memerge))
-#plot(memerge)
-summary (memerge)#no interaction. Simplify model
-
-memerge1<-lm(mean_emerge~temp+maternal+svldelimean+mean_dist, data=mean2)
-hist(residuals(memerge1))
-shapiro.test(residuals(memerge1))
-summary (memerge1)
-plot(mean2$mean_emerge, mean2$svldelimean)
-
 
 #ind as random
 
@@ -494,40 +263,6 @@ summary (memerge1)
 
 #####guich
 
-mactivityg<-lm(log(mean_dist)~temp*maternal+svlguichmean, data=mean3)
-hist(residuals(mactivityg))
-shapiro.test(residuals(mactivityg))
-#plot(mactivity)
-summary (mactivityg)#no interaction. Simplify model
-
-mactivity1g<-lm(log(mean_dist)~temp+maternal+svlguichmean, data=mean3)
-hist(residuals(mactivity1g))
-shapiro.test(residuals(mactivity1g))
-summary (mactivity1g)
-
-msnoutg<-lm(log(mean_snout)~temp*maternal+svlguichmean, data=mean3)
-hist(residuals(msnoutg))
-shapiro.test(residuals(msnoutg))
-#plot(msnout)
-summary (msnoutg)#no interaction. Simplify model
-
-msnout1g<-lm(log(mean_snout)~temp+maternal+svlguichmean+mean_dist, data=mean3)
-hist(residuals(msnout1g))
-shapiro.test(residuals(msnout1g))
-summary (msnout1g)
-
-memergeg<-lm(log(mean_emerge)~temp*maternal+svlguichmean+mean_dist, data=mean3)
-hist(residuals(memergeg))
-shapiro.test(residuals(memergeg))
-#plot(memerge)
-summary (memergeg)#no interaction. Simplify model
-
-memerge1g<-lm(log(mean_emerge)~temp+maternal+svlguichmean+mean_dist, data=mean3)
-hist(residuals(memerge1g))
-shapiro.test(residuals(memerge1g))
-summary (memerge1g)
-
-
 #ind as random
 
 mactivityg<-lmer(Distance.moved~temp*maternal+svlguich+(1|id), data=dat3)
@@ -571,12 +306,24 @@ summary (memerge1g)
 ####################################
 
 # Repeatability
+      # Transformations
+        dat2 <- dat2 %>% mutate(logTimeSnout = log(Time_snout_sec),
+                                logspeed_1m = log(speed_1m_s),
+                                logspeed_burst = log(burst_25cm)) 
+        write.csv(dat2, file = "./output/dat2.csv")
+        write.csv(dat3, file = "./output/dat3.csv")
     # Delicata
-        dat2
+        tim_emerge_ap  <- bf(Time_emerge_sec | mi()~ 1 + (1|q|id) + (1|a|clutch)) + gaussian()
+         tim_snout_ap  <- bf(logTimeSnout | mi() ~ 1 + (1|q|id) + (1|b|clutch)) + gaussian()
+         dist_move_ap  <- bf(Distance.moved | mi() ~ 1 + (1|q|id) + (1|c|clutch)) + gaussian()
+             speed_per <- bf(logspeed_1m | mi() ~ 1 + (1|q|id) + (1|d|clutch)) + gaussian()
+       speed_burst_per <- bf(logspeed_burst | mi() ~ 1 + (1|q|id) + (1|e|clutch)) + gaussian()
 
+        deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 2000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/deli_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat2)
+    
     # Guichenoti
         dat3
-        
+
 ####################################
 ########### Figures ################
 ####################################
