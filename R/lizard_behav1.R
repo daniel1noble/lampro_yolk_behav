@@ -312,6 +312,9 @@ summary (memerge1g)
                                 logspeed_burst = log(burst_25cm)) 
         write.csv(dat2, file = "./output/dat2.csv")
         write.csv(dat3, file = "./output/dat3.csv")
+
+        dat2  <- read.csv("./output/dat2.csv")
+        dat3  <- read.csv("./output/dat3.csv")
     # Delicata
         tim_emerge_ap  <- bf(Time_emerge_sec | mi()~ 1 + (1|q|id) + (1|a|clutch)) + gaussian()
          tim_snout_ap  <- bf(logTimeSnout | mi() ~ 1 + (1|q|id) + (1|b|clutch)) + gaussian()
@@ -319,11 +322,12 @@ summary (memerge1g)
              speed_per <- bf(logspeed_1m | mi() ~ 1 + (1|q|id) + (1|d|clutch)) + gaussian()
        speed_burst_per <- bf(logspeed_burst | mi() ~ 1 + (1|q|id) + (1|e|clutch)) + gaussian()
 
-        deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 2000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/deli_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat2)
+        deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 2000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/deli_mv", file_refit = "always", control = list(adapt_delta = 0.98), data = dat2)
     
     # Guichenoti
-        dat3
 
+        guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 2000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/deli_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+    
 ####################################
 ########### Figures ################
 ####################################
