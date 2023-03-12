@@ -18,17 +18,21 @@
   dat$maternal<-as.factor(dat$egg_treat)
   dat$sp<-as.factor(dat$sp)
   str(dat)
-
+#visualizing data
   hist(dat$Distance.moved)#one outlier
   shapiro.test(dat$Distance.moved)
   hist(dat$time_tohide)#one clear outlier
   hist(dat$time_hiding)
   hist(dat$time_active)
+  hist(log(dat1$speed_1m_s)) #log makes it much better so use that
+  hist(log(dat1$burst_25cm))
+  hist(dat1$SVL)
+  hist(dat1$Total)
+  plot(dat1$SVL,dat1$Total)
 
   unique(length (dat$id))
 
-  ##checking repeatibility of behaviour responses before removing weird numbers 
-  #(weird numbers in terms of antipredation are those lonerg than 90 min or 5400sec)
+  ##checking repeatibility of behavioural responses 
 
   #first take out animals without intact tail
 
@@ -36,15 +40,13 @@
   dat1<-dat[!(dat$Tail_intact=="No"),]
   dim(dat1)#removed 15 lines, so 5 animals
 
-  #delicata
+  #dataset for delicata
 
   dim(dat1)
   dat2<-dat1[!(dat1$sp=="Guich"),]
   dim(dat2)
-  #dattrial<-dat2[!(dat2$speed_1m_s>30),]
-  #dim(dattrial)
 
-  #guich
+  #dataset for guich
   dim(dat1)
   dat3<-dat1[!(dat1$sp=="Deli"),]
   dim(dat3)
@@ -87,7 +89,8 @@
   repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat2, 
                     datatype = "Gaussian", nboot = 1000, npermut = 0)
   print(repbehavs3)
-  #gouch
+
+  #guich
   repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat3, 
                   datatype = "Gaussian", nboot = 1000, npermut = 0)
   print(repbehavs)
@@ -109,10 +112,9 @@
   print(repbehavs3)
 
 
-#Note: all values quite repeatable so can do the analyses with means or with animal ID as random
-#I might check both for a couple of variables to see whether the results are similar
+#Note: all values quite repeatable
 
-#also, check whether there is acclimation on the responses associated with the trial with the pass of time
+#checking whether there is acclimation on the responses associated with the trial with the pass of time
 
 m1m<-lmer(log(speed_1m_s)~day+(1|id), data=dat1)
 hist(residuals(m1m))
@@ -147,31 +149,8 @@ hist(residuals(mtoactiveg))
 summary(mtoactiveg)#guich habituates
 boxplot(time_active~day, data=dat3)
 
-##Start analysis of running performance
-
-(hist(dat1$speed_1m_s)) #there are 3 clear outliers. Check model and residuals
-#log makes it much better so use that
-hist(log(dat1$burst_25cm))
-
-hist(dat1$SVL)
-hist(dat1$Total)
-plot(dat1$SVL,dat1$Total)
-
-#delicata
-
-dim(dat1)
-dat2<-dat1[!(dat1$sp=="Guich"),]
-dim(dat2)
-#dattrial<-dat2[!(dat2$speed_1m_s>30),]
-#dim(dattrial)
-
-#guich
-dim(dat1)
-dat3<-dat1[!(dat1$sp=="Deli"),]
-dim(dat3)
-
-#with outliers
-cor.test(dat2$SVL, dat2$Tail)
+##Analysis of running performance
+#####################################
 
 #SVL differs between temps so scale to add as covariate
 dat2$svldeli <- scale(dat2$SVL)
@@ -179,8 +158,7 @@ dat3$svlguich <- scale(dat3$SVL)
 mean2$svldelimean <- scale(mean2$SVL)
 mean3$svlguichmean <- scale(mean3$SVL)
 
-
-hist(dat2$speed_1m_s)
+hist (log(dat2$speed_1m_s))
 mveldel<-lmer(log(speed_1m_s)~temp*maternal+svldeli+(1|id), data=dat2)
 hist(residuals(mveldel))
 summary(mveldel)
@@ -199,17 +177,7 @@ mveldel3<-lmer(log(burst_25cm)~temp+maternal+svldeli+(1|id), data=dat2)
 hist(residuals(mveldel3))
 summary(mveldel3)
 
-#without outliers
-#hist(dattrial$speed_1m_s)
-#mveldel1<-lmer(log(speed_1m_s)~temp*maternal+SVL+(1|id), data=dattrial)
-#hist(residuals(mveldel1))
-#summary(mveldel1)
-#plot(mveldel1)#much better without outliers.  
-
-
-
-
-### antipredation#########################
+### Antipredation#########################
 #########################################
 
 #deli
@@ -222,7 +190,6 @@ shapiro.test(residuals(mactivity))
 plot(mactivity)
 summary(mactivity)
 
-
 mactivity.2<-lmer(Distance.moved~temp+maternal+svldeli+(1|id), data=dat2)
 hist(residuals(mactivity.2))
 shapiro.test(residuals(mactivity.2))
@@ -230,13 +197,7 @@ plot(mactivity.2)
 summary(mactivity.2)
 
 sim2 <- simulateResiduals(glmmTMB(Movement ~ temp*maternal+svldeli+(1|id), data=dat2, family="gaussian"))
-testResiduals(sim2)#not bad
-
-mactivity.3<-lmer(Distance.moved~temp+maternal+svldeli+(1|id), data=dat2)
-hist(residuals(mactivity.3))
-shapiro.test(residuals(mactivity.3))
-plot(mactivity.3)
-summary(mactivity.3)     
+testResiduals(sim2)#not bad   
 
 msnout<-lmer(Time_snout_sec~temp*maternal+svldeli+(1|id), data=dat2)
 hist(residuals(msnout))
@@ -271,13 +232,11 @@ shapiro.test(residuals(mactivityg))
 plot(mactivityg)
 summary(mactivityg)
 
-
 mactivity1g<-lmer(Distance.moved~temp+maternal+svlguich+(1|id), data=dat3)
 hist(residuals(mactivity1g))
 shapiro.test(residuals(mactivity1g))
 plot(mactivity1g)
 summary(mactivity1g)
-
 
 msnoutg<-lmer(log(Time_snout_sec)~temp*maternal+svlguich+(1|id), data=dat3)
 hist(residuals(msnoutg))
@@ -506,7 +465,3 @@ ggplot(mean3, aes(x=temp, y=mean_emerge, fill = maternal)) +
   theme_bw()
 dev.off()
 
-
-########analysis with means-keeping these just in case
-
-#
