@@ -281,18 +281,20 @@ summary (memerge1g)
       
         dat2  <- read.csv("./output/dat2.csv")
         dat3  <- read.csv("./output/dat3.csv")
-    # Delicata
-        tim_emerge_ap  <- bf(logTime_emerge_sec | mi()~ 1 + (1|id) + (1|clutch)) + gaussian()
-         tim_snout_ap  <- bf(logTimeSnout | mi() ~ 1 + (1|id) + (1|clutch)) + gaussian()
-         dist_move_ap  <- bf(Distance.moved | mi() ~ 1 + (1|id) + (1|clutch)) + gaussian()
-             speed_per <- bf(logspeed_1m | mi() ~ 1 + (1|id) + (1|clutch)) + gaussian()
-       speed_burst_per <- bf(logspeed_burst | mi() ~ 1 + (1|id) + (1|clutch)) + gaussian()
+    
+    # The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
+        tim_emerge_ap  <- bf(logTime_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+         tim_snout_ap  <- bf(logTimeSnout       | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+         dist_move_ap  <- bf(Distance.moved     | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+             speed_per <- bf(logspeed_1m        | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+       speed_burst_per <- bf(logspeed_burst     | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
 
-        deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 2000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv", file_refit = "always", data = dat2)
+    # Delicata
+        deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
     
     # Guichenoti
 
-        guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 2000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/deli_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+        guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/deli_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
     
 ####################################
 ########### Figures ################
