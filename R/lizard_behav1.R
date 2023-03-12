@@ -266,7 +266,8 @@ summary (memerge1g)
 
 # Repeatability
       # Transformations
-        dat2 <- dat2 %>% mutate(logTimeSnout = log(Time_snout_sec),
+        rerun = FALSE
+        if(refun){dat2 <- dat2 %>% mutate(logTimeSnout = log(Time_snout_sec),
                                 logspeed_1m = log(speed_1m_s),
                                 logspeed_burst = na_if(log(burst_25cm), -Inf),
                                 logTime_emerge_sec = log(Time_emerge_sec)) 
@@ -277,10 +278,10 @@ summary (memerge1g)
                                 logTime_emerge_sec = log(Time_emerge_sec)) 
         
         write.csv(dat2, file = "./output/dat2.csv")
-        write.csv(dat3, file = "./output/dat3.csv")
+        write.csv(dat3, file = "./output/dat3.csv")} else{
       
         dat2  <- read.csv("./output/dat2.csv")
-        dat3  <- read.csv("./output/dat3.csv")
+        dat3  <- read.csv("./output/dat3.csv")}
     
     # The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
         tim_emerge_ap  <- bf(logTime_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
