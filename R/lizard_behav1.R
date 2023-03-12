@@ -292,10 +292,10 @@ summary (memerge1g)
 
     # Delicata
         deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
-    
+        
     # Guichenoti
 
-        guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/deli_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+        guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/guich_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
     
 ####################################
 ########### Figures ################
