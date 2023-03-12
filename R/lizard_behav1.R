@@ -268,18 +268,25 @@ summary (memerge1g)
       # Transformations
         dat2 <- dat2 %>% mutate(logTimeSnout = log(Time_snout_sec),
                                 logspeed_1m = log(speed_1m_s),
-                                logspeed_burst = log(burst_25cm)) 
+                                logspeed_burst = na_if(log(burst_25cm), -Inf),
+                                logTime_emerge_sec = log(Time_emerge_sec)) 
+
+        dat3 <- dat3 %>% mutate(logTimeSnout = log(Time_snout_sec),
+                                logspeed_1m = log(speed_1m_s),
+                                logspeed_burst = na_if(log(burst_25cm), -Inf),
+                                logTime_emerge_sec = log(Time_emerge_sec)) 
+        
         write.csv(dat2, file = "./output/dat2.csv")
         write.csv(dat3, file = "./output/dat3.csv")
-
+      
         dat2  <- read.csv("./output/dat2.csv")
         dat3  <- read.csv("./output/dat3.csv")
     # Delicata
-        tim_emerge_ap  <- bf(Time_emerge_sec | mi()~ 1 + (1|q|id) + (1|z|clutch)) + gaussian()
-         tim_snout_ap  <- bf(logTimeSnout | mi() ~ 1 + (1|q|id) + (1|z|clutch)) + gaussian()
-         dist_move_ap  <- bf(Distance.moved | mi() ~ 1 + (1|q|id) + (1|z|clutch)) + gaussian()
-             speed_per <- bf(logspeed_1m | mi() ~ 1 + (1|q|id) + (1|z|clutch)) + gaussian()
-       speed_burst_per <- bf(logspeed_burst | mi() ~ 1 + (1|q|id) + (1|z|clutch)) + gaussian()
+        tim_emerge_ap  <- bf(logTime_emerge_sec | mi()~ 1 + (1|id) + (1|clutch)) + gaussian()
+         tim_snout_ap  <- bf(logTimeSnout | mi() ~ 1 + (1|id) + (1|clutch)) + gaussian()
+         dist_move_ap  <- bf(Distance.moved | mi() ~ 1 + (1|id) + (1|clutch)) + gaussian()
+             speed_per <- bf(logspeed_1m | mi() ~ 1 + (1|id) + (1|clutch)) + gaussian()
+       speed_burst_per <- bf(logspeed_burst | mi() ~ 1 + (1|id) + (1|clutch)) + gaussian()
 
         deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 2000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv", file_refit = "always", data = dat2)
     
