@@ -505,3 +505,8 @@ ggplot(mean3, aes(x=temp, y=mean_emerge, fill = maternal)) +
   ylab('Time to active (log, s)') + xlab('Temperature')+
   theme_bw()
 dev.off()
+
+
+########analysis with means-keeping these just in case
+
+#
