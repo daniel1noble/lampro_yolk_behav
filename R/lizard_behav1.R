@@ -215,11 +215,11 @@ summary (memerge1g)
                                 logTime_emerge_sec = log(Time_emerge_sec),
                                 z_svl = scale(SVL)) 
         
-        write.csv(dat2, file = "./output/dat2.csv")
-        write.csv(dat3, file = "./output/dat3.csv")
+        write.csv(dat2, file = "./output/data/dat2.csv")
+        write.csv(dat3, file = "./output/data/dat3.csv")
         } else{
-          dat2  <- read.csv("./output/dat2.csv")
-          dat3  <- read.csv("./output/dat3.csv")}
+          dat2  <- read.csv("./output/data/dat2.csv")
+          dat3  <- read.csv("./output/data/dat3.csv")}
     
     # The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
         tim_emerge_ap  <- bf(logTime_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
@@ -296,7 +296,6 @@ summary (memerge1g)
     # Guichenoti
 
         guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
-
 
 ####################################
 # Bayesian Multivariate models - Part III
