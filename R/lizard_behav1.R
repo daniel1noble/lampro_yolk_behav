@@ -283,7 +283,7 @@ summary (memerge1g)
 # Bayesian Multivariate models - Part II
 ####################################
 
-# The interaction models first. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
+# The interaction models first. 
         tim_emerge_ap_int  <- bf(logTime_emerge_sec | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
          tim_snout_ap_int  <- bf(logTimeSnout       | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
          dist_move_ap_int  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
@@ -292,10 +292,29 @@ summary (memerge1g)
 
     # Delicata
         deli_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
-        
+  
     # Guichenoti
 
         guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+
+
+####################################
+# Bayesian Multivariate models - Part III
+####################################
+
+    # The main effects models
+        tim_emerge_ap_main  <- bf(logTime_emerge_sec | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+         tim_snout_ap_main  <- bf(logTimeSnout       | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+         dist_move_ap_main  <- bf(Distance.moved     | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+             speed_per_main <- bf(logspeed_1m        | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+       speed_burst_per_main <- bf(logspeed_burst     | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+
+    # Delicata
+        deli_mv_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv_main", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+
+    # Guichenoti
+
+        guich_mv_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/guich_mv_main", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
 
 ####################################
 ########### Figures ################
