@@ -198,7 +198,7 @@ shapiro.test(residuals(memerge1g))
 summary (memerge1g)
 
 ####################################
-# Bayesian Multivariate models
+# Bayesian Multivariate models - Part I
 ####################################
 
 # Transformations
@@ -206,12 +206,14 @@ summary (memerge1g)
         if(refun){dat2 <- dat2 %>% mutate(logTimeSnout = log(Time_snout_sec),
                                 logspeed_1m = log(speed_1m_s),
                                 logspeed_burst = na_if(log(burst_25cm), -Inf),
-                                logTime_emerge_sec = log(Time_emerge_sec)) 
+                                logTime_emerge_sec = log(Time_emerge_sec),
+                                z_svl = scale(SVL)) 
 
         dat3 <- dat3 %>% mutate(logTimeSnout = log(Time_snout_sec),
                                 logspeed_1m = log(speed_1m_s),
                                 logspeed_burst = na_if(log(burst_25cm), -Inf),
-                                logTime_emerge_sec = log(Time_emerge_sec)) 
+                                logTime_emerge_sec = log(Time_emerge_sec),
+                                z_svl = scale(SVL)) 
         
         write.csv(dat2, file = "./output/dat2.csv")
         write.csv(dat3, file = "./output/dat3.csv")
@@ -276,6 +278,24 @@ summary (memerge1g)
     traits <- c("Burst Speed (m/s - log)", "Time to Emerge (s - log)", "Sprint Speed - 1m (m/s - log)", "Time Snout Out (s - log)", "Distanced Moved (cm)")
     table2  <-  cbind(traits, table2)
 
+
+####################################
+# Bayesian Multivariate models - Part II
+####################################
+
+# The interaction models first. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
+        tim_emerge_ap_int  <- bf(logTime_emerge_sec | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+         tim_snout_ap_int  <- bf(logTimeSnout       | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+         dist_move_ap_int  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+             speed_per_int <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+       speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+
+    # Delicata
+        deli_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+        
+    # Guichenoti
+
+        guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
 
 ####################################
 ########### Figures ################
