@@ -18,6 +18,7 @@
   dat$maternal<-as.factor(dat$egg_treat)
   dat$sp<-as.factor(dat$sp)
   str(dat)
+
 #visualizing data
   hist(dat$Distance.moved)#one outlier
   shapiro.test(dat$Distance.moved)
@@ -30,9 +31,7 @@
   hist(dat1$Total)
   plot(dat1$SVL,dat1$Total)
 
-  unique(length (dat$id))
-
-  ##checking repeatibility of behavioural responses 
+  unique(length (dat$id)) 
 
   #first take out animals without intact tail
 
@@ -51,68 +50,6 @@
   dat3<-dat1[!(dat1$sp=="Deli"),]
   dim(dat3)
 
-## Repeatability
-  repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat1, 
-                datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs)
-
-  repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat1, 
-                  datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs1)
-
-  repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat1, 
-                  datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs2)
-
-  repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat1, 
-                    datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs3)
-
-  #one by one
-  #deli
-  repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat2, 
-                  datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs)
-
-  repsprint <- rpt(burst_25cm ~ (1 | id), grname = "id", data = dat2, 
-                  datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs)
-
-  repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat2, 
-                    datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs1)
-
-  repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat2, 
-                    datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs2)
-
-  repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat2, 
-                    datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs3)
-
-  #guich
-  repbehavs <- rpt(time_active ~ (1 | id), grname = "id", data = dat3, 
-                  datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs)
-
-  repsprint <- rpt(burst_25cm ~ (1 | id), grname = "id", data = dat3, 
-                  datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs)
-
-  repbehavs1 <- rpt(time_hiding ~ (1 | id), grname = "id", data = dat3, 
-                    datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs1)
-
-  repbehavs2 <- rpt(speed_1m_s ~ (1 | id), grname = "id", data = dat3, 
-                    datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs2)
-
-  repbehavs3 <- rpt(Distance.moved ~ (1 | id), grname = "id", data = dat3, 
-                    datatype = "Gaussian", nboot = 1000, npermut = 0)
-  print(repbehavs3)
-
-
-#Note: all values quite repeatable
 
 #checking whether there is acclimation on the responses associated with the trial with the pass of time
 
@@ -264,8 +201,7 @@ summary (memerge1g)
 # Bayesian Multivariate models
 ####################################
 
-# Repeatability
-      # Transformations
+# Transformations
         rerun = FALSE
         if(refun){dat2 <- dat2 %>% mutate(logTimeSnout = log(Time_snout_sec),
                                 logspeed_1m = log(speed_1m_s),
@@ -278,10 +214,10 @@ summary (memerge1g)
                                 logTime_emerge_sec = log(Time_emerge_sec)) 
         
         write.csv(dat2, file = "./output/dat2.csv")
-        write.csv(dat3, file = "./output/dat3.csv")} else{
-      
-        dat2  <- read.csv("./output/dat2.csv")
-        dat3  <- read.csv("./output/dat3.csv")}
+        write.csv(dat3, file = "./output/dat3.csv")
+        } else{
+          dat2  <- read.csv("./output/dat2.csv")
+          dat3  <- read.csv("./output/dat3.csv")}
     
     # The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
         tim_emerge_ap  <- bf(logTime_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
@@ -296,7 +232,51 @@ summary (memerge1g)
     # Guichenoti
 
         guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/guich_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
-    
+
+####################################
+# Repeatability
+####################################
+  source("./R/func.R")
+
+# Delicata
+  # Extract posteriors
+    posterior_deli <- posterior_samples(deli_mv, pars = c("^sd", "sigma"))
+       clutch_deli <- posterior_deli[,grep("clutch", colnames(posterior_deli))]
+           id_deli <- posterior_deli[,grep("id", colnames(posterior_deli))]
+        sigma_deli <- posterior_deli[,grep("sigma", colnames(posterior_deli))]
+
+    # Calculate the repeatability of each trait. Note the trait name needs to match how it's stored in brms
+    R_deli_speed_burst <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "logspeedburst")
+     R_deli_timeemerge <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "logTimeemergesec")
+        R_deli_speed1m <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "logspeed1m")
+      R_deli_timesnout <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "logTimeSnout")
+       R_deli_distmove <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "Distancemoved")
+
+    # Create an organised table to summarise all the repeatability. 
+    table1 <- rbind(R_deli_speed_burst, R_deli_timeemerge, R_deli_speed1m, R_deli_timesnout, R_deli_timeemerge)
+    traits <- c("Burst Speed (m/s - log)", "Time to Emerge (s - log)", "Sprint Speed - 1m (m/s - log)", "Time Snout Out (s - log)", "Distanced Moved (cm)")
+    table1  <-  cbind(traits, table1)
+
+# Guichenoti
+    # Extract posteriors
+    posterior_guich <- posterior_samples(guich_mv, pars = c("^sd", "sigma"))
+       clutch_guich <- posterior_guich[,grep("clutch", colnames(posterior_guich))]
+           id_guich <- posterior_guich[,grep("id", colnames(posterior_guich))]
+        sigma_guich <- posterior_guich[,grep("sigma", colnames(posterior_guich))]
+
+    # Calculate the repeatability of each trait. Note the trait name needs to match how it's stored in brms
+    R_guich_speed_burst <- repeatability(id_guich, clutch_guich, sigma_guich, trait = "logspeedburst")
+     R_guich_timeemerge <- repeatability(id_guich, clutch_guich, sigma_guich, trait = "logTimeemergesec")
+        R_guich_speed1m <- repeatability(id_guich, clutch_guich, sigma_guich, trait = "logspeed1m")
+      R_guich_timesnout <- repeatability(id_guich, clutch_guich, sigma_guich, trait = "logTimeSnout")
+       R_guich_distmove <- repeatability(id_guich, clutch_guich, sigma_guich, trait = "Distancemoved")
+
+    # Create an organised table to summarise all the repeatability. 
+    table2 <- rbind(R_guich_speed_burst, R_guich_timeemerge, R_guich_speed1m, R_guich_timesnout, R_guich_timeemerge)
+    traits <- c("Burst Speed (m/s - log)", "Time to Emerge (s - log)", "Sprint Speed - 1m (m/s - log)", "Time Snout Out (s - log)", "Distanced Moved (cm)")
+    table2  <-  cbind(traits, table2)
+
+
 ####################################
 ########### Figures ################
 ####################################
