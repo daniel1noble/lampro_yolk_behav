@@ -85,7 +85,19 @@ mtoactiveg<-lmer(time_active~day+(1|id), data=dat3)
 hist(residuals(mtoactiveg))
 summary(mtoactiveg)#guich habituates
 boxplot(time_active~day, data=dat3)
+############################################
+# Morphology
+############################################
+# The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
+          svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat) + gaussian()
+         mass  <- bf(mass  | mi() ~ 1 + temp + egg_treat) + gaussian()
+         tail  <- bf(tail  | mi() ~ 1 + temp + egg_treat) + gaussian()
+            
+    # Delicata
+        deli_mv <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
 
+
+######################################
 ##Analysis of running performance
 #####################################
 
@@ -203,7 +215,7 @@ summary (memerge1g)
 
 # Transformations
         rerun = FALSE
-        if(refun){dat2 <- dat2 %>% mutate(logTimeSnout = log(Time_snout_sec),
+        if(rerun){dat2 <- dat2 %>% mutate(logTimeSnout = log(Time_snout_sec),
                                 logspeed_1m = log(speed_1m_s),
                                 logspeed_burst = na_if(log(burst_25cm), -Inf),
                                 logTime_emerge_sec = log(Time_emerge_sec),
@@ -231,6 +243,23 @@ summary (memerge1g)
     # Delicata
         deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
         
+    # Calculate repeatability
+        # Extract posteriors
+              id_var <- posterior_samples(deli_mv, pars = c("^sd_id"))^2
+          clutch_var <- posterior_samples(deli_mv, pars = c("^sd_clutch"))^2
+          sigma_var  <- posterior_samples(deli_mv, pars = c("^sigma"))^2
+
+        # Calculate repeatability for all variables
+            R <- data.frame(mapply(function(x, y, z) x / (x+y+z), x = id_var, y = clutch_var, z = sigma_var))
+
+        # Mean R for each trait
+            R_mean <- colMeans(R)
+            R_u95 <- plyr::ldply(lapply(R, function(x) quantile(x,0.975)))
+            R_l95 <- plyr::ldply(lapply(R, function(x) quantile(x,0.025)))
+
+        # Table of repeatabilities
+            Rs <- cbind(R = R_mean, l = R_l95[,2], u = R_u95[,2])
+   
     # Guichenoti
 
         guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/guich_mv", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
@@ -293,9 +322,25 @@ summary (memerge1g)
     # Delicata
         deli_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
   
+      # Time snout
+        ts <- posterior_samples(deli_mv_int, pars = c("^b_logTimeSnout"))
+        # I want the mean of A_23
+        A_23_deli <- ts[,1]; mean(A_23_deli); quantile(A_23_deli, c(0.025, 0.975))
+        A_28_deli <- ts[,1]+ ts[,2] ; mean(A_28_deli); quantile(A_28_deli, c(0.025, 0.975))
+        constrast_deli <-  A_28_deli - A_23_deli
     # Guichenoti
 
         guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "./output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+
+      # Time snout
+        ts_guich <- posterior_samples(guich_mv_int, pars = c("^b_logTimeSnout"))
+        # I want the mean of A_23
+        A_23_guich <- ts_guich[,1]; mean(A_23_guich); quantile(A_23_guich, c(0.025, 0.975))
+        A_28_guich <- ts_guich[,1]+ ts_guich[,2] ; mean(A_28_guich); quantile(A_28_guich, c(0.025, 0.975))
+        constrast_guich <-  A_28_guich - A_23_guich
+
+      # Is the magnitude of difference between 23 and 28 the same for guich and deli?
+        mean(constrast_deli - constrast_guich); quantile(constrast_deli - constrast_guich, c(0.025, 0.975)); pmcmc(constrast_deli - constrast_guich)
 
 ####################################
 # Bayesian Multivariate models - Part III
