@@ -85,6 +85,7 @@ mtoactiveg<-lmer(time_active~day+(1|id), data=dat3)
 hist(residuals(mtoactiveg))
 summary(mtoactiveg)#guich habituates
 boxplot(time_active~day, data=dat3)
+
 ############################################
 # Morphology
 ############################################
