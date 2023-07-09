@@ -7,7 +7,7 @@
   pacman::p_load(rptR, brms, bayestestR, tidyverse)  
 
 ## Load Data
-  dat<-read.csv( "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/dataset_reclean_git.csv")
+  dat<-read.csv( "./data/dataset_reclean_git.csv")
 
 ## Data cleaning and organisation
   str(dat)
@@ -105,13 +105,13 @@ boxplot(time_active~day, data=dat3)
 # Morphology Deli
 ############################################
 # The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
-      library("brms")   
-         svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+     
+          svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
          mass  <- bf(Weigth  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
          tail  <- bf(Tail  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
             
 
-deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/deli_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
 deli_morph
 
 ###do temp and maternal interact?
@@ -149,8 +149,8 @@ deli_morph_simple
 
 # Morphology guich
 ############################################
-library("brms")   
-svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+
+ svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 mass  <- bf(Weigth  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 tail  <- bf(Tail  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 
