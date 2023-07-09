@@ -19,9 +19,6 @@ pmcmc <- function(x, null = 0, twotail = TRUE){
 #' @param trait A character string with the name of the trait in the data set
 #' 
 #' 
-id_sd = id_deli
-clutch_sd = clutch_deli
-sigma_sd = sigma_deli
 repeatability <- function(id_sd, clutch_sd, sigma_sd, trait) {
 			    id_v <- id_sd[,grep(trait, colnames(id_sd))]^2
 			clutch_v <- clutch_sd[,grep(trait, colnames(clutch_sd))]^2
