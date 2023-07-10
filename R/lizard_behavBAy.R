@@ -109,17 +109,19 @@ boxplot(time_active~day, data=dat3)
           svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
          mass  <- bf(Weigth  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
          tail  <- bf(Tail  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-            
 
 deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
 deli_morph
 
+# If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
+deli_morph <- readRDS("./output/models/deli_morph.rds")
+
 ###do temp and maternal interact?
 dat2$scaleage<-scale(dat2$age)
 
-svl  <- bf(SVL | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-mass  <- bf(Weigth       | mi() ~ 1 + temp*egg_treat + scaleage + (1|clutch)) + gaussian()
-tail  <- bf(Tail     | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+svl   <- bf(SVL     | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+mass  <- bf(Weigth  | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+tail  <- bf(Tail    | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
 deli_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
 deli_morph_int
@@ -351,7 +353,7 @@ summary (memerge1g)
     
     # Calculate repeatability
         # Extract posteriors
-          id_var <- posterior_samples(deli_mv, pars = c("^sd_id"))^2
+              id_var <- posterior_samples(deli_mv, pars = c("^sd_id"))^2
           clutch_var <- posterior_samples(deli_mv, pars = c("^sd_clutch"))^2
           sigma_var  <- posterior_samples(deli_mv, pars = c("^sigma"))^2
 
@@ -366,6 +368,7 @@ summary (memerge1g)
         # Table of repeatabilities
             Rs <- cbind(R = R_mean, l = R_l95[,2], u = R_u95[,2])
             Rs
+    
     # Guichenoti
    
    tim_emerge_ap  <- bf(logTime_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
@@ -376,7 +379,25 @@ summary (memerge1g)
    
         guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_mv", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
         guich_mv
-        
+
+    # Calculate repeatability for all variables for Guichenoti
+        # Extract posteriors
+              id_var_guich <- posterior_samples(guich_mv, pars = c("^sd_id"))^2
+          clutch_var_guich <- posterior_samples(guich_mv, pars = c("^sd_clutch"))^2
+          sigma_var_guich  <- posterior_samples(guich_mv, pars = c("^sigma"))^2
+
+        # Calculate repeatability for all variables
+            R_guich <- data.frame(mapply(function(x, y, z) x / (x+y+z), x = id_var_guich, y = clutch_var_guich, z = sigma_var_guich))
+
+        # Mean R for each trait
+            R_mean_guich <- colMeans(R_guich)
+            R_u95_guich <- plyr::ldply(lapply(R_guich, function(x) quantile(x,0.975)))
+            R_l95_guich <- plyr::ldply(lapply(R_guich, function(x) quantile(x,0.025)))
+
+        # Table of repeatabilities
+            Rs_guich <- cbind(R = R_mean_guich, l = R_l95_guich[,2], u = R_u95_guich[,2])
+            Rs_guich
+
 ####################################
 # Repeatability
 ####################################
@@ -427,7 +448,7 @@ summary (memerge1g)
 
 # The interaction models first. 
         tim_emerge_ap_int  <- bf(Time_emerge_sec    | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-         tim_snout_ap_int  <- bf(Time_snout_sec    | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+         tim_snout_ap_int  <- bf(Time_snout_sec     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
          dist_move_ap_int  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
              speed_per_int <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
        speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
@@ -470,6 +491,7 @@ summary (memerge1g)
         
         guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
         guich_mv_int
+      
       # Time snout
         ts_guich <- posterior_samples(guich_mv_int, pars = c("^b_logTimeSnout"))
         # I want the mean of A_23
@@ -506,8 +528,8 @@ summary (memerge1g)
     # Delicata
         deli_behav_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_main", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
         deli_behav_main
+    
     # Guichenoti
-
         guich_mv_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_main", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
         guich_mv_main
 
