@@ -121,51 +121,49 @@ svl  <- bf(SVL | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian(
 mass  <- bf(Weigth       | mi() ~ 1 + temp*egg_treat + scaleage + (1|clutch)) + gaussian()
 tail  <- bf(Tail     | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-deli_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/deli_morph_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+deli_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
 deli_morph_int
 
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
 morphdeli <- posterior_samples(deli_morph_int, pars = c("SVL"))
-morphdeli
-
 A_23_deli_morph <- morphdeli[,1]; mean(A_23_deli_morph); quantile(A_23_deli_morph, c(0.025, 0.975))
 A_28_deli_morph <- morphdeli[,1]+ morphdeli[,2] ; mean(A_28_deli_morph); quantile(A_28_deli_morph, c(0.025, 0.975))
 mean(A_28_deli_morph - A_23_deli_morph); quantile(A_28_deli_morph - A_23_deli_morph, c(0.025, 0.975))
 
 morphdeli_tail <- posterior_samples(deli_morph_int, pars = c("Tail"))
-morphdeli_tail
 A_23_deli_tail <- morphdeli_tail[,1]; mean(A_23_deli_tail); quantile(A_23_deli_tail, c(0.025, 0.975))
 A_28_deli_tail <- morphdeli_tail[,1]+ morphdeli_tail[,2] ; mean(A_28_deli_tail); quantile(A_28_deli_tail, c(0.025, 0.975))
 mean(A_28_deli_tail - A_23_deli_tail); quantile(A_28_deli_tail - A_23_deli_tail, c(0.025, 0.975))
 
 
-svl  <- bf(SVL | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
-mass  <- bf(Weigth       | mi() ~ 1 + temp+egg_treat + scaleage + (1|clutch)) + gaussian()
-tail  <- bf(Tail     | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+# Tetsing how SVL, weight and tail length are impacted by temperature and egg treatment conditioning on age
+ svl  <- bf(SVL    | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+mass  <- bf(Weigth | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+tail  <- bf(Tail   | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-deli_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/deli_morph_simple", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+deli_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_simple", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
 deli_morph_simple
 
 
 # Morphology guich
 ############################################
 
- svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+ svl  <- bf(SVL     | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 mass  <- bf(Weigth  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-tail  <- bf(Tail  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+tail  <- bf(Tail    | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 
 
-guich_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/guich_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+guich_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
 guich_morph
 
 ###do temp and maternal interact?
 dat3$scaleage<-scale(dat3$age)
 
-svl  <- bf(SVL | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-mass  <- bf(Weigth       | mi() ~ 1 + temp*egg_treat + scaleage + (1|clutch)) + gaussian()
-tail  <- bf(Tail     | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+svl   <- bf(SVL    | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+mass  <- bf(Weigth | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+tail  <- bf(Tail   | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/guich_morph_int", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
+guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_int", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
 guich_morph_int
 
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
@@ -186,7 +184,6 @@ C_28_g_morph <- morphguich[,1]+ morphguich[,5]; mean(C_28_g_morph); quantile(C_2
 mean(C_28_g_morph - A_28_g_morph); quantile(C_28_g_morph - A_28_g_morph, c(0.025, 0.975))
 
 morphg_tail <- posterior_samples(guich_morph_int, pars = c("Tail"))
-morphg_tail
 A_23_g_tail <- morphg_tail[,1]; mean(A_23_g_tail); quantile(A_23_g_tail, c(0.025, 0.975))
 A_28_g_tail <- morphg_tail[,1]+ morphg_tail[,2] ; mean(A_28_g_tail); quantile(A_28_g_tail, c(0.025, 0.975))
 mean(A_28_g_tail - A_23_g_tail); quantile(A_28_g_tail - A_23_g_tail, c(0.025, 0.975))
@@ -196,11 +193,11 @@ C_28_g_tail <- morphg_tail[,1]+ morphg_tail[,5] ; mean(C_28_g_tail); quantile(C_
 mean(C_28_g_tail - C_23_g_tail); quantile(C_28_g_tail - C_23_g_tail, c(0.025, 0.975))
 
 
-svl  <- bf(SVL | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
-mass  <- bf(Weigth       | mi() ~ 1 + temp+egg_treat + scaleage + (1|clutch)) + gaussian()
-tail  <- bf(Tail     | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+ svl  <- bf(SVL     | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+mass  <- bf(Weigth  | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+tail  <- bf(Tail    | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-guich_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/guich_morph_simple", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
+guich_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_simple", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
 guich_morph_simple
 
 ######################################
@@ -333,39 +330,25 @@ summary (memerge1g)
                                 logTime_emerge_sec = log(Time_emerge_sec),
                                 z_svl = scale(SVL)) 
         
-        write.csv(dat2, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/dat2.csv")
-        write.csv(dat3, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/dat3.csv")
+        write.csv(dat2, file = "output/data/dat2.csv")
+        write.csv(dat3, file = "output/data/dat3.csv")
         } else{
-          dat2  <- read.csv("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/dat2.csv")
-          dat3  <- read.csv("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/dat3.csv")}
+          dat2  <- read.csv("output/data/dat2.csv")
+          dat3  <- read.csv("output/data/dat3.csv")}
 
 #Transformations Maider (deli does no need to log-transform antipredatory behaviours)
-
-#dat2$logTimeSnout<-log(dat2$Time_snout_sec)
-dat2$logspeed_1m<-log(dat2$speed_1m_s)
-dat2$logspeed_burst<-log(dat2$X25fast)
-#dat2$logTime_emerge_sec<-log(dat2$Time_emerge_sec)
-dat2$z_svl<- scale(dat2$SVL)
-
-#guich transformation
-dat3$logTimeSnout <- log(dat3$Time_snout_sec)
-dat3$logspeed_1m <- log(dat3$speed_1m_s)
-dat3$logspeed_burst <- log(dat3$X25fast)
-dat3$logTime_emerge_sec <- log(dat3$Time_emerge_sec)
-dat3$z_svl <- scale(dat3$SVL)
-str(dat3)
-    
     # The model. Intercept only controlling for ID and clutch. Most variables are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
 
-        tim_emerge_ap  <- bf(Time_emerge_sec) | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
-         tim_snout_ap  <- bf(Time_snout_sec)     | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
-         dist_move_ap  <- bf(Distance.moved)     | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
-             speed_per <- bf(logspeed_1m)    | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
-       speed_burst_per <- bf(logspeed_burst)    | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
+        tim_emerge_ap  <- bf(Time_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+         tim_snout_ap  <- bf(Time_snout_sec  | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+         dist_move_ap  <- bf(Distance.moved  | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+             speed_per <- bf(logspeed_1m     | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+       speed_burst_per <- bf(logspeed_burst  | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
 
     # Delicata
-        deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/deli_mv", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+        deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
         deli_mv
+    
     # Calculate repeatability
         # Extract posteriors
           id_var <- posterior_samples(deli_mv, pars = c("^sd_id"))^2
@@ -385,15 +368,14 @@ str(dat3)
             Rs
     # Guichenoti
    
-   tim_emerge_ap  <- bf(logTime_emerge_sec) | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
-   tim_snout_ap  <- bf(logTimeSnout) | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
-   dist_move_ap  <- bf(Distance.moved) | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
-   speed_per <- bf(logspeed_1m) | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
-   speed_burst_per <- bf(logspeed_burst) | mi() ~ 1 + (1|q|id) + (1|clutch) + gaussian()
+   tim_emerge_ap  <- bf(logTime_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+    tim_snout_ap  <- bf(logTimeSnout       | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+    dist_move_ap  <- bf(Distance.moved     | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+        speed_per <- bf(logspeed_1m        | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+  speed_burst_per <- bf(logspeed_burst     | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
    
-        guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/guich_mv", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
+        guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_mv", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
         guich_mv
-        #"./output/models/guich_mv"
         
 ####################################
 # Repeatability
@@ -451,7 +433,7 @@ str(dat3)
        speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
 
     # Delicata
-        deli_behav_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/deli_behav_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+        deli_behav_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
         deli_behav_int
       # Time snout
         ts <- posterior_samples(deli_behav_int, pars = c("Timeemergesec"))
@@ -480,13 +462,13 @@ str(dat3)
     # Guichenoti
 
         #all but distance moved loged. Differnet from deli
-        tim_emerge_ap_int  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-        tim_snout_ap_int  <- bf(logTimeSnout    | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-        dist_move_ap_int  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-        speed_per_int <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+         tim_emerge_ap_int  <- bf(logTime_emerge_sec | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+          tim_snout_ap_int  <- bf(logTimeSnout       | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+          dist_move_ap_int  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+              speed_per_int <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
         
-        guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+        guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
         guich_mv_int
       # Time snout
         ts_guich <- posterior_samples(guich_mv_int, pars = c("^b_logTimeSnout"))
@@ -522,21 +504,18 @@ str(dat3)
        speed_burst_per_main <- bf(logspeed_burst     | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
 
     # Delicata
-        deli_behav_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/deli_behav_main", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+        deli_behav_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_main", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
         deli_behav_main
     # Guichenoti
 
-        guich_mv_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/Output_models/guich_mv_main", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+        guich_mv_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_main", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
         guich_mv_main
-
-
-
 
 ####################################
 ########### Figures ################
 ####################################
 #morphol deli
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/taildeli.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/taildeli.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean2, aes(x=temp, y=Tail, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA) +
@@ -546,7 +525,7 @@ ggplot(mean2, aes(x=temp, y=Tail, fill = maternal)) +
   theme_bw()
 dev.off()
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/svldeli.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/svldeli.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean2, aes(x=temp, y=SVL, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA) +
@@ -556,7 +535,7 @@ ggplot(mean2, aes(x=temp, y=SVL, fill = maternal)) +
   theme_bw()
 dev.off()
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/massdeli.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/massdeli.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean2, aes(x=temp, y=Weigth, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA) +
@@ -568,7 +547,7 @@ dev.off()
 
 
 #morphol gucih
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/tailguich.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/tailguich.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean3, aes(x=temp, y=Tail, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA, alpha=0.5) +
@@ -579,7 +558,7 @@ ggplot(mean3, aes(x=temp, y=Tail, fill = maternal)) +
   theme_bw()
 dev.off()
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/svlguich.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/svlguich.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean3, aes(x=temp, y=SVL, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA, alpha=0.5) +
@@ -589,7 +568,7 @@ ggplot(mean3, aes(x=temp, y=SVL, fill = maternal)) +
   theme_bw()
 dev.off()
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/massguich.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/massguich.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean3, aes(x=temp, y=Weigth, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA, alpha=0.5) +
@@ -603,7 +582,7 @@ dev.off()
 ##performance
 #deli
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/distancedeli.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/distancedeli.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean2, aes(x=temp, y=mean_dist, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA) +
@@ -613,7 +592,7 @@ ggplot(mean2, aes(x=temp, y=mean_dist, fill = maternal)) +
   theme_bw()
 dev.off()
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/1mdeli.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/1mdeli.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean2, aes(x=temp, y=bxcx1mdeli, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA) +
@@ -623,7 +602,7 @@ ggplot(mean2, aes(x=temp, y=bxcx1mdeli, fill = maternal)) +
   theme_bw()
 dev.off()
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/25cmdeli.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/25cmdeli.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean2, aes(x=temp, y=bxcx25deli, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA) +
@@ -635,7 +614,7 @@ dev.off()
 
 ##guich
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/distanceguich.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/distanceguich.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean3, aes(x=temp, y=log(mean_dist), fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA, alpha=0.5) +
@@ -645,7 +624,7 @@ ggplot(mean3, aes(x=temp, y=log(mean_dist), fill = maternal)) +
   theme_bw()
 dev.off()
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/1mguich.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/1mguich.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean3, aes(x=temp, y=bxcx1guich, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA, alpha=0.5) +
@@ -655,7 +634,7 @@ ggplot(mean3, aes(x=temp, y=bxcx1guich, fill = maternal)) +
   theme_bw()
 dev.off()
 
-pdf("/Users/maitxu/Documents/2023 EBD/papers/lizard_behav/figs/25cmguich.pdf", width = 4, height = 4.5, useDingbats = F)
+pdf("output/figs/25cmguich.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean3, aes(x=temp, y=bxcx25guich, fill = maternal)) + 
   geom_point(position=position_jitterdodge(jitter.width = 0.05),alpha=0.8, size = 0.7) +
   geom_boxplot(outlier.shape = NA, alpha=0.5) +
