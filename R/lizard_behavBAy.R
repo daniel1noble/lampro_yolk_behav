@@ -104,46 +104,61 @@ boxplot(time_active~day, data=dat3)
 ############################################
 # Morphology Deli
 ############################################
+
+#use different dataset since we don't have repeated measures for this
+
+morph<-read.csv( "./data/morphol.csv")
+str(morph)
+
+morph$temp<-as.factor(morph$temp)  
+morph$egg_treat<-as.factor(morph$egg_treat)
+morph$sp<-as.factor(morph$sp)
+morph$scaleage<-scale(morph$age)
+
+morph2<-morph[!(morph$sp=="Guich"),]
+morph3<-morph[!(morph$sp=="Deli"),]
+
 # The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
      
           svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
          mass  <- bf(Weigth  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
          tail  <- bf(Tail  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 
-deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 deli_morph
 
 # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
 deli_morph <- readRDS("./output/models/deli_morph.rds")
 
 ###do temp and maternal interact?
-dat2$scaleage<-scale(dat2$age)
+morph2$scaleage<-scale(morph2$age)
 
 svl   <- bf(SVL     | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 mass  <- bf(Weigth  | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 tail  <- bf(Tail    | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-deli_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+deli_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 deli_morph_int
 
+#no 2-way interactions
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
-morphdeli <- posterior_samples(deli_morph_int, pars = c("SVL"))
-A_23_deli_morph <- morphdeli[,1]; mean(A_23_deli_morph); quantile(A_23_deli_morph, c(0.025, 0.975))
-A_28_deli_morph <- morphdeli[,1]+ morphdeli[,2] ; mean(A_28_deli_morph); quantile(A_28_deli_morph, c(0.025, 0.975))
-mean(A_28_deli_morph - A_23_deli_morph); quantile(A_28_deli_morph - A_23_deli_morph, c(0.025, 0.975))
+#morphdeli <- posterior_samples(deli_morph_int, pars = c("SVL"))
+#A_23_deli_morph <- morphdeli[,1]; mean(A_23_deli_morph); quantile(A_23_deli_morph, c(0.025, 0.975))
+#A_28_deli_morph <- morphdeli[,1]+ morphdeli[,2] ; mean(A_28_deli_morph); quantile(A_28_deli_morph, c(0.025, 0.975))
+#mean(A_28_deli_morph - A_23_deli_morph); quantile(A_28_deli_morph - A_23_deli_morph, c(0.025, 0.975))
 
-morphdeli_tail <- posterior_samples(deli_morph_int, pars = c("Tail"))
-A_23_deli_tail <- morphdeli_tail[,1]; mean(A_23_deli_tail); quantile(A_23_deli_tail, c(0.025, 0.975))
-A_28_deli_tail <- morphdeli_tail[,1]+ morphdeli_tail[,2] ; mean(A_28_deli_tail); quantile(A_28_deli_tail, c(0.025, 0.975))
-mean(A_28_deli_tail - A_23_deli_tail); quantile(A_28_deli_tail - A_23_deli_tail, c(0.025, 0.975))
+#morphdeli_tail <- posterior_samples(deli_morph_int, pars = c("Tail"))
+#A_23_deli_tail <- morphdeli_tail[,1]; mean(A_23_deli_tail); quantile(A_23_deli_tail, c(0.025, 0.975))
+#A_28_deli_tail <- morphdeli_tail[,1]+ morphdeli_tail[,2] ; mean(A_28_deli_tail); quantile(A_28_deli_tail, c(0.025, 0.975))
+#mean(A_28_deli_tail - A_23_deli_tail); quantile(A_28_deli_tail - A_23_deli_tail, c(0.025, 0.975))
 
 
-# Tetsing how SVL, weight and tail length are impacted by temperature and egg treatment conditioning on age
+# Testing how SVL, weight and tail length are impacted by temperature and egg treatment conditioning on age
  svl  <- bf(SVL    | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
 mass  <- bf(Weigth | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
 tail  <- bf(Tail   | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-deli_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_simple", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+deli_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_simple", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 deli_morph_simple
 
 
@@ -159,47 +174,48 @@ guich_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, war
 guich_morph
 
 ###do temp and maternal interact?
-dat3$scaleage<-scale(dat3$age)
+morph3$scaleage<-scale(morph3$age)
 
 svl   <- bf(SVL    | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 mass  <- bf(Weigth | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 tail  <- bf(Tail   | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_int", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
+guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_int", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
 guich_morph_int
 
+#no 2-way interaction significant
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
 
-morphguich <- posterior_samples(guich_morph_int, pars = c("SVL"))
-morphguich
+#morphguich <- posterior_samples(guich_morph_int, pars = c("SVL"))
+#morphguich
 
-A_23_guich_morph <- morphguich[,1]; mean(A_23_guich_morph); quantile(A_23_guich_morph, c(0.025, 0.975))
-A_28_guich_morph <- morphguich[,1]+ morphguich[,2] ; mean(A_28_guich_morph); quantile(A_28_guich_morph, c(0.025, 0.975))
-mean(A_28_guich_morph - A_23_guich_morph); quantile(A_28_guich_morph - A_23_guich_morph, c(0.025, 0.975))
+#A_23_guich_morph <- morphguich[,1]; mean(A_23_guich_morph); quantile(A_23_guich_morph, c(0.025, 0.975))
+#A_28_guich_morph <- morphguich[,1]+ morphguich[,2] ; mean(A_28_guich_morph); quantile(A_28_guich_morph, c(0.025, 0.975))
+#mean(A_28_guich_morph - A_23_guich_morph); quantile(A_28_guich_morph - A_23_guich_morph, c(0.025, 0.975))
 
-C_23_g_morph <- morphguich[,1]+ morphguich[,3]; mean(C_23_g_morph); quantile(C_23_g_morph, c(0.025, 0.975))
-C_28_g_morph <- morphguich[,1]+ morphguich[,5]; mean(C_28_g_morph); quantile(C_28_g_morph, c(0.025, 0.975))
-mean(C_28_g_morph - C_23_g_morph); quantile(C_28_g_morph - C_23_g_morph, c(0.025, 0.975))
+#C_23_g_morph <- morphguich[,1]+ morphguich[,3]; mean(C_23_g_morph); quantile(C_23_g_morph, c(0.025, 0.975))
+#C_28_g_morph <- morphguich[,1]+ morphguich[,5]; mean(C_28_g_morph); quantile(C_28_g_morph, c(0.025, 0.975))
+#mean(C_28_g_morph - C_23_g_morph); quantile(C_28_g_morph - C_23_g_morph, c(0.025, 0.975))
 
-A_28_g_morph <- morphguich[,1]+ morphguich[,2]; mean(A_28_g_morph); quantile(A_28_g_morph, c(0.025, 0.975))
-C_28_g_morph <- morphguich[,1]+ morphguich[,5]; mean(C_28_g_morph); quantile(C_28_g_morph, c(0.025, 0.975))
-mean(C_28_g_morph - A_28_g_morph); quantile(C_28_g_morph - A_28_g_morph, c(0.025, 0.975))
+#A_28_g_morph <- morphguich[,1]+ morphguich[,2]; mean(A_28_g_morph); quantile(A_28_g_morph, c(0.025, 0.975))
+#C_28_g_morph <- morphguich[,1]+ morphguich[,5]; mean(C_28_g_morph); quantile(C_28_g_morph, c(0.025, 0.975))
+#mean(C_28_g_morph - A_28_g_morph); quantile(C_28_g_morph - A_28_g_morph, c(0.025, 0.975))
 
-morphg_tail <- posterior_samples(guich_morph_int, pars = c("Tail"))
-A_23_g_tail <- morphg_tail[,1]; mean(A_23_g_tail); quantile(A_23_g_tail, c(0.025, 0.975))
-A_28_g_tail <- morphg_tail[,1]+ morphg_tail[,2] ; mean(A_28_g_tail); quantile(A_28_g_tail, c(0.025, 0.975))
-mean(A_28_g_tail - A_23_g_tail); quantile(A_28_g_tail - A_23_g_tail, c(0.025, 0.975))
+#morphg_tail <- posterior_samples(guich_morph_int, pars = c("Tail"))
+#A_23_g_tail <- morphg_tail[,1]; mean(A_23_g_tail); quantile(A_23_g_tail, c(0.025, 0.975))
+#A_28_g_tail <- morphg_tail[,1]+ morphg_tail[,2] ; mean(A_28_g_tail); quantile(A_28_g_tail, c(0.025, 0.975))
+#mean(A_28_g_tail - A_23_g_tail); quantile(A_28_g_tail - A_23_g_tail, c(0.025, 0.975))
 
-C_23_g_tail <- morphg_tail[,1]+ morphg_tail[,3]; mean(C_23_g_tail); quantile(C_23_g_tail, c(0.025, 0.975))
-C_28_g_tail <- morphg_tail[,1]+ morphg_tail[,5] ; mean(C_28_g_tail); quantile(C_28_g_tail, c(0.025, 0.975))
-mean(C_28_g_tail - C_23_g_tail); quantile(C_28_g_tail - C_23_g_tail, c(0.025, 0.975))
+#C_23_g_tail <- morphg_tail[,1]+ morphg_tail[,3]; mean(C_23_g_tail); quantile(C_23_g_tail, c(0.025, 0.975))
+#C_28_g_tail <- morphg_tail[,1]+ morphg_tail[,5] ; mean(C_28_g_tail); quantile(C_28_g_tail, c(0.025, 0.975))
+#mean(C_28_g_tail - C_23_g_tail); quantile(C_28_g_tail - C_23_g_tail, c(0.025, 0.975))
 
 
  svl  <- bf(SVL     | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
 mass  <- bf(Weigth  | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
 tail  <- bf(Tail    | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-guich_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_simple", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
+guich_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_simple", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
 guich_morph_simple
 
 ######################################
@@ -533,6 +549,57 @@ summary (memerge1g)
         guich_mv_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_main", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
         guich_mv_main
 
+        ####################################
+        # Bayesian Multivariate models - Part IV
+        #Repeating models of behaviour without controlling for SVL
+        ####################################
+        
+    # Deli
+        # 2-way
+        
+        tim_emerge_ap_int1  <- bf(Time_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        tim_snout_ap_int1  <- bf(Time_snout_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        dist_move_ap_int1  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_per_int1 <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_burst_per_int1 <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        
+  
+        deli_behav_int_nonSVL <- brms::brm(tim_emerge_ap_int1 + tim_snout_ap_int1 + dist_move_ap_int1 + speed_per_int1 + speed_burst_per_int1 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_int_nonSVL", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+        
+        deli_behav_int_nonSVL  
+        
+        #main model
+        tim_emerge_ap_int1  <- bf(Time_emerge_sec    | mi() ~ 1 + temp + egg_treat  + (1|q|id) + (1|clutch)) + gaussian()
+        tim_snout_ap_int1  <- bf(Time_snout_sec    | mi() ~ 1 + temp + egg_treat  + (1|q|id) + (1|clutch)) + gaussian()
+        dist_move_ap_int1  <- bf(Distance.moved     | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_per_int1 <- bf(logspeed_1m        | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_burst_per_int1 <- bf(logspeed_burst     | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        
+        
+        deli_behav_main_nonSVL <- brms::brm(tim_emerge_ap_int1 + tim_snout_ap_int1 + dist_move_ap_int1 + speed_per_int1 + speed_burst_per_int1 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_main_nonSVL", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+        deli_behav_main_nonSVL 
+        
+    #Guich
+        #2-way
+        tim_emerge_ap_int2  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        tim_snout_ap_int2  <- bf(logTimeSnout    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        dist_move_ap_int2  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_per_int2 <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_burst_per_int2 <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        
+        guich_mv_int_nonSVL <- brms::brm(tim_emerge_ap_int2 + tim_snout_ap_int2 + dist_move_ap_int2 + speed_per_int2 + speed_burst_per_int2 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int_nonSVL", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+        guich_mv_int_nonSVL
+        
+        #main
+        tim_emerge_ap_int2  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        tim_snout_ap_int2  <- bf(logTimeSnout    | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        dist_move_ap_int2  <- bf(Distance.moved     | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_per_int2 <- bf(logspeed_1m        | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_burst_per_int2 <- bf(logspeed_burst     | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        
+        guich_mv_main_nonSVL <- brms::brm(tim_emerge_ap_int2 + tim_snout_ap_int2 + dist_move_ap_int2 + speed_per_int2 + speed_burst_per_int2 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_main_nonSVL", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+        guich_mv_main_nonSVL
+                                              
 ####################################
 ########### Figures ################
 ####################################
