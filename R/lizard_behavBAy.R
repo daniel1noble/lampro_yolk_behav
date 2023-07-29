@@ -125,10 +125,10 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 ############################################
 
   # MAIN EFFECTS MODEL: The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
-      
-            svl  <- bf(SVL    ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-          mass  <- bf(Weigth ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-          tail  <- bf(Tail   ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+      # WIthout age
+           svl  <- bf(SVL    ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
+          mass  <- bf(Weigth ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
+          tail  <- bf(Tail   ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
 
   refit <- FALSE
   if(refit){
@@ -139,6 +139,21 @@ morph$egg_treat <- as.factor(morph$egg_treat)
     # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
     deli_morph <- readRDS("./output/models/deli_morph.rds")
   }
+
+  # Testing how SVL, weight and tail length are impacted by temperature and egg treatment conditioning on age
+    svl   <- bf(SVL    ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
+    mass  <- bf(Weigth ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
+    tail  <- bf(Tail   ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
+
+  if(refit){
+    
+    deli_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_simple", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
+
+  } else {
+    # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
+    deli_morph_simple <- readRDS("./output/models/deli_morph_simple.rds")
+  }
+ 
 
   ### INTERACTION MODEL: do temp and maternal interact?
 
@@ -194,9 +209,9 @@ if(refit){
 
 ### INTERACTION MODEL: do temp and maternal interact?
 
-svl   <- bf(SVL    | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-mass  <- bf(Weigth | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-tail  <- bf(Tail   | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  svl   <- bf(SVL     ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  mass  <- bf(Weigth  ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  tail  <- bf(Tail    ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
 if(refit){
   guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_int", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
@@ -262,7 +277,8 @@ mveldel3<-lmer(log(burst_25cm)~temp+maternal+svldeli+(1|id), data=dat2)
 hist(residuals(mveldel3))
 summary(mveldel3)
 
-### Antipredation#########################
+#########################################
+### Antipredatory Behaviour
 #########################################
 
 #deli
@@ -345,9 +361,9 @@ hist(residuals(memerge1g))
 shapiro.test(residuals(memerge1g))
 summary (memerge1g)
 
-####################################
+#############################################
 # Bayesian Multivariate models - Part I
-####################################
+############################################
 
 # Transformations
         rerun = FALSE
@@ -429,9 +445,9 @@ summary (memerge1g)
             Rs_guich <- cbind(R = R_mean_guich, l = R_l95_guich[,2], u = R_u95_guich[,2])
             Rs_guich
 
-####################################
+############################################
 # Repeatability
-####################################
+############################################
   source("./R/func.R")
 
 # Delicata
@@ -472,10 +488,9 @@ summary (memerge1g)
     traits <- c("Burst Speed (m/s - log)", "Time to Emerge (s - log)", "Sprint Speed - 1m (m/s - log)", "Time Snout Out (s - log)", "Distanced Moved (cm)")
     table2  <-  cbind(traits, table2)
 
-
-####################################
+############################################
 # Bayesian Multivariate models - Part II
-####################################
+############################################
 
 # The interaction models first. 
         tim_emerge_ap_int  <- bf(Time_emerge_sec    | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
@@ -545,9 +560,9 @@ summary (memerge1g)
         # Is the magnitude of difference between 23 and 28 the same for guich and deli?
         mean(constrast_deli - constrast_guich); quantile(constrast_deli - constrast_guich, c(0.025, 0.975)); pmcmc(constrast_deli - constrast_guich)
 
-####################################
+############################################
 # Bayesian Multivariate models - Part III
-####################################
+############################################
 
     # The main effects models
         tim_emerge_ap_main  <- bf(Time_emerge_sec    | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
@@ -615,9 +630,9 @@ summary (memerge1g)
         guich_mv_main_nonSVL <- brms::brm(tim_emerge_ap_int2 + tim_snout_ap_int2 + dist_move_ap_int2 + speed_per_int2 + speed_burst_per_int2 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_main_nonSVL", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
         guich_mv_main_nonSVL
                                               
-####################################
-########### Figures ################
-####################################
+############################################
+########### Figures ########################
+############################################
 #morphol deli
 pdf("output/figs/taildeli.pdf", width = 4, height = 4.5, useDingbats = F)
 ggplot(mean2, aes(x=temp, y=Tail, fill = maternal)) + 
