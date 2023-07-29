@@ -3,149 +3,165 @@
 # temperature and maternal effects
 #########################################################
 
-## Load Packages
-  pacman::p_load(rptR, brms, bayestestR, tidyverse)  
+#########################################################
+## Load Packages and Visualising Data
+#########################################################
+    pacman::p_load(rptR, brms, bayestestR, tidyverse)  
 
-## Load Data
-  dat<-read.csv( "./data/dataset_reclean_git.csv")
+  ## Load Data
+    dat<-read.csv( "./data/dataset_reclean_git.csv")
 
-## Data cleaning and organisation
-  str(dat)
-  dat$time_tohide<-as.numeric(dat$Time_hide_sec)  
-  dat$time_hiding<-as.numeric(dat$Time_snout_sec)
-  dat$time_active<-as.numeric(dat$Time_emerge_sec)
-  dat$temp<-as.factor(dat$temp)  
-  dat$maternal<-as.factor(dat$egg_treat)
-  dat$sp<-as.factor(dat$sp)
-  str(dat)
+  ## Data cleaning and organisation
+    str(dat)
+    dat$time_tohide<-as.numeric(dat$Time_hide_sec)  
+    dat$time_hiding<-as.numeric(dat$Time_snout_sec)
+    dat$time_active<-as.numeric(dat$Time_emerge_sec)
+    dat$temp<-as.factor(dat$temp)  
+    dat$maternal<-as.factor(dat$egg_treat)
+    dat$sp<-as.factor(dat$sp)
+    str(dat)
 
-#visualizing data
-  hist(dat$Distance.moved)#one outlier
-  shapiro.test(dat$Distance.moved)
-  hist(dat$time_tohide)#one clear outlier
-  hist(dat$time_hiding)
-  hist(dat$time_active)
-  hist(log(dat1$speed_1m_s)) #log makes it much better so use that
-  hist(log(dat1$burst_25cm))
-  hist(dat1$SVL)
-  hist(dat1$Total)
-  hist(log(dat$X25fast))
-  plot(dat1$SVL,dat1$Total)
+  #visualizing data
+    hist(dat$Distance.moved)#one outlier
+    shapiro.test(dat$Distance.moved)
+    hist(dat$time_tohide)#one clear outlier
+    hist(dat$time_hiding)
+    hist(dat$time_active)
+    hist(log(dat1$speed_1m_s)) #log makes it much better so use that
+    hist(log(dat1$burst_25cm))
+    hist(dat1$SVL)
+    hist(dat1$Total)
+    hist(log(dat$X25fast))
+    plot(dat1$SVL,dat1$Total)
 
-  unique(length (dat$id)) 
+    unique(length (dat$id)) 
 
-  #first take out animals without intact tail
+    #first take out animals without intact tail
 
-  dim(dat)
-  dat1<-dat[!(dat$Tail_intact=="No"),]
-  dim(dat1)#removed 15 lines, so 5 animals
+    dim(dat)
+    dat1<-dat[!(dat$Tail_intact=="No"),]
+    dim(dat1)#removed 15 lines, so 5 animals
 
-  #dataset for delicata
+    #dataset for delicata
 
-  dim(dat1)
-  dat2<-dat1[!(dat1$sp=="Guich"),]
-  dim(dat2)
-hist(dat2$Time_snout_sec)
-shapiro.test(dat2$Time_snout_sec)
-hist(dat2$Time_emerge_sec)
-hist(dat2$speed_1m_s)
-dat22<-dat2[!(dat2$X25fast>8),]
-hist(dat2$Distance.moved)
+    dim(dat1)
+    dat2<-dat1[!(dat1$sp=="Guich"),]
+    dim(dat2)
+  hist(dat2$Time_snout_sec)
+  shapiro.test(dat2$Time_snout_sec)
+  hist(dat2$Time_emerge_sec)
+  hist(dat2$speed_1m_s)
+  dat22<-dat2[!(dat2$X25fast>8),]
+  hist(dat2$Distance.moved)
 
-hist(dat22$X25fast)
-  
-  #dataset for guich
-  dim(dat1)
-  dat3<-dat1[!(dat1$sp=="Deli"),]
-  dim(dat3)
+  hist(dat22$X25fast)
+    
+    #dataset for guich
+    dim(dat1)
+    dat3<-dat1[!(dat1$sp=="Deli"),]
+    dim(dat3)
 
-  hist(log(dat3$Time_snout_sec))
-  shapiro.test(dat3$Time_snout_sec)
-  hist(log(dat3$Time_emerge_sec))
-  hist(log(dat3$speed_1m_s))
-  hist(dat3$Distance.moved)
-  hist(log(dat3$X25fast))
-  
-#checking whether there is acclimation on the responses associated with the trial with the pass of time
+    hist(log(dat3$Time_snout_sec))
+    shapiro.test(dat3$Time_snout_sec)
+    hist(log(dat3$Time_emerge_sec))
+    hist(log(dat3$speed_1m_s))
+    hist(dat3$Distance.moved)
+    hist(log(dat3$X25fast))
+    
+  #checking whether there is acclimation on the responses associated with the trial with the pass of time
 
-m1m<-lmer(log(speed_1m_s)~day+(1|id), data=dat1)
-hist(residuals(m1m))
-summary(m1m)#no acclimation in time to run a m
+  m1m<-lmer(log(speed_1m_s)~day+(1|id), data=dat1)
+  hist(residuals(m1m))
+  summary(m1m)#no acclimation in time to run a m
 
-mmove<-lmer(Distance.moved~day+(1|id), data=dat2)
-hist(residuals(mmove))
-shapiro.test(residuals(mmove))
-summary(mmove)
-boxplot(Distance.moved~day, data=dat1)
+  mmove<-lmer(Distance.moved~day+(1|id), data=dat2)
+  hist(residuals(mmove))
+  shapiro.test(residuals(mmove))
+  summary(mmove)
+  boxplot(Distance.moved~day, data=dat1)
 
-mmoveg<-lmer(Distance.moved~day+(1|id), data=dat3)
-hist(residuals(mmoveg))
-summary(mmoveg)
-boxplot(Distance.moved~day, data=dat3)#guich habituates
+  mmoveg<-lmer(Distance.moved~day+(1|id), data=dat3)
+  hist(residuals(mmoveg))
+  summary(mmoveg)
+  boxplot(Distance.moved~day, data=dat3)#guich habituates
 
-mhide<-lmer(time_hiding~day+(1|id), data=dat2)
-hist(residuals(mhide))
-summary(mhide)
+  mhide<-lmer(time_hiding~day+(1|id), data=dat2)
+  hist(residuals(mhide))
+  summary(mhide)
 
-mhideg<-lmer(time_hiding~day+(1|id), data=dat3)
-hist(residuals(mhideg))
-summary(mhideg)
-boxplot(time_hiding~day, data=dat3)#guich habituates
+  mhideg<-lmer(time_hiding~day+(1|id), data=dat3)
+  hist(residuals(mhideg))
+  summary(mhideg)
+  boxplot(time_hiding~day, data=dat3)#guich habituates
 
-mtoactive<-lmer(time_active~day+(1|id), data=dat2)
-hist(residuals(mtoactive))
-summary(mtoactive)
+  mtoactive<-lmer(time_active~day+(1|id), data=dat2)
+  hist(residuals(mtoactive))
+  summary(mtoactive)
 
-mtoactiveg<-lmer(time_active~day+(1|id), data=dat3)
-hist(residuals(mtoactiveg))
-summary(mtoactiveg)#guich habituates
-boxplot(time_active~day, data=dat3)
+  mtoactiveg<-lmer(time_active~day+(1|id), data=dat3)
+  hist(residuals(mtoactiveg))
+  summary(mtoactiveg)#guich habituates
+  boxplot(time_active~day, data=dat3)
 
 ############################################
-# Morphology Deli
+# Morphology Data
 ############################################
 
-#use different dataset since we don't have repeated measures for this
+# Use different dataset since we don't have repeated measures for this
 
-morph<-read.csv( "./data/morphol.csv")
-str(morph)
+          morph <- read.csv( "./data/morphol.csv")
 
-morph$temp<-as.factor(morph$temp)  
-morph$egg_treat<-as.factor(morph$egg_treat)
-morph$sp<-as.factor(morph$sp)
-morph$scaleage<-scale(morph$age)
+     morph$temp <- as.factor(morph$temp)  
+morph$egg_treat <- as.factor(morph$egg_treat)
+       morph$sp <- as.factor(morph$sp)
+ morph$scaleage <- scale(morph$age)
 
-morph2<-morph[!(morph$sp=="Guich"),]
-morph3<-morph[!(morph$sp=="Deli"),]
+# Extract each species separately
+  morph2<-morph[!(morph$sp=="Guich"),]
+  morph3<-morph[!(morph$sp=="Deli"),]
 
-# The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
-     
-          svl  <- bf(SVL   | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-         mass  <- bf(Weigth  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-         tail  <- bf(Tail  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+############################################
+# Morphology Models - delicata
+############################################
 
-deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
-deli_morph
+  # MAIN EFFECTS MODEL: The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
+      
+            svl  <- bf(SVL    ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+          mass  <- bf(Weigth ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+          tail  <- bf(Tail   ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 
-# If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
-deli_morph <- readRDS("./output/models/deli_morph.rds")
+  refit <- FALSE
+  if(refit){
+    
+    deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 
-###do temp and maternal interact?
-morph2$scaleage<-scale(morph2$age)
+  } else {
+    # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
+    deli_morph <- readRDS("./output/models/deli_morph.rds")
+  }
 
-svl   <- bf(SVL     | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-mass  <- bf(Weigth  | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-tail  <- bf(Tail    | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  ### INTERACTION MODEL: do temp and maternal interact?
 
-deli_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
-deli_morph_int
+  svl   <- bf(SVL    ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  mass  <- bf(Weigth ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  tail  <- bf(Tail   ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-## Compare models with main effects vs interaction. Which one is best supported?
+  if(refit){
+    
+    deli_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 
-mod_compare_int <- waic(deli_morph_int)
-mod_compare_main<- waic(deli_morph)
+  } else {
+    
+    deli_morph_int <- readRDS("./output/models/deli_morph_int.rds")
+    deli_morph_int <- add_criterion(deli_morph_int, "waic")
+  }
 
-mod_tab_deli <- loo_compare(mod_compare_int, mod_compare_main) # Lowest waic is best supported.
+  ### MODEL SELECTION - WAIC - Compare models with main effects vs interaction. Which one is best supported?
+
+    mod_compare_int  <- waic(deli_morph_int)
+    mod_compare_main <- waic(deli_morph)
+
+        mod_tab_deli <- loo_compare(mod_compare_int, mod_compare_main) # Lowest waic is best supported.
 
 #no 2-way interactions
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
@@ -159,35 +175,36 @@ mod_tab_deli <- loo_compare(mod_compare_int, mod_compare_main) # Lowest waic is 
 #A_28_deli_tail <- morphdeli_tail[,1]+ morphdeli_tail[,2] ; mean(A_28_deli_tail); quantile(A_28_deli_tail, c(0.025, 0.975))
 #mean(A_28_deli_tail - A_23_deli_tail); quantile(A_28_deli_tail - A_23_deli_tail, c(0.025, 0.975))
 
-
-# Testing how SVL, weight and tail length are impacted by temperature and egg treatment conditioning on age
- svl  <- bf(SVL    | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
-mass  <- bf(Weigth | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
-tail  <- bf(Tail   | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
-
-deli_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_simple", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
-deli_morph_simple
-
 ############################################
-# Morphology guich
+# Morphology Models - guichenoti
 ############################################
 
- svl  <- bf(SVL     | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-mass  <- bf(Weigth  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-tail  <- bf(Tail    | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+### MAIN EFFECTS MODEL: The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
+   svl  <- bf(SVL    ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+  mass  <- bf(Weigth ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+  tail  <- bf(Tail   ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 
-guich_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
-guich_morph
+if(refit){
+  guich_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+  guich_morph
+} else {
+  guich_morph <- readRDS("./output/models/guich_morph.rds")
+  guich_morph <- add_criterion(guich_morph, "waic")
+}
 
-###do temp and maternal interact?
-morph3$scaleage<-scale(morph3$age)
+### INTERACTION MODEL: do temp and maternal interact?
 
 svl   <- bf(SVL    | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 mass  <- bf(Weigth | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 tail  <- bf(Tail   | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_int", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
-guich_morph_int
+if(refit){
+  guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_int", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
+  guich_morph_int
+} else {
+  guich_morph_int <- readRDS("./output/models/guich_morph_int.rds")
+  guich_morph_int <- add_criterion(guich_morph_int, "waic")
+}
 
 #no 2-way interaction significant
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
@@ -215,14 +232,6 @@ guich_morph_int
 #C_23_g_tail <- morphg_tail[,1]+ morphg_tail[,3]; mean(C_23_g_tail); quantile(C_23_g_tail, c(0.025, 0.975))
 #C_28_g_tail <- morphg_tail[,1]+ morphg_tail[,5] ; mean(C_28_g_tail); quantile(C_28_g_tail, c(0.025, 0.975))
 #mean(C_28_g_tail - C_23_g_tail); quantile(C_28_g_tail - C_23_g_tail, c(0.025, 0.975))
-
-
- svl  <- bf(SVL     | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
-mass  <- bf(Weigth  | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
-tail  <- bf(Tail    | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
-
-guich_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_simple", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
-guich_morph_simple
 
 ######################################
 ##Analysis of running performance
