@@ -140,6 +140,13 @@ tail  <- bf(Tail    | mi() ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaus
 deli_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 deli_morph_int
 
+## Compare models with main effects vs interaction. Which one is best supported?
+
+mod_compare_int <- waic(deli_morph_int)
+mod_compare_main<- waic(deli_morph)
+
+mod_tab_deli <- loo_compare(mod_compare_int, mod_compare_main) # Lowest waic is best supported.
+
 #no 2-way interactions
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
 #morphdeli <- posterior_samples(deli_morph_int, pars = c("SVL"))
@@ -161,14 +168,13 @@ tail  <- bf(Tail   | mi() ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gauss
 deli_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_simple", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 deli_morph_simple
 
-
+############################################
 # Morphology guich
 ############################################
 
  svl  <- bf(SVL     | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 mass  <- bf(Weigth  | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
 tail  <- bf(Tail    | mi() ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-
 
 guich_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
 guich_morph
