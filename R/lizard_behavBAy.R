@@ -132,12 +132,11 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 
   refit <- FALSE
   if(refit){
-    
-    deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
+      deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 
-  } else {
-    # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
-    deli_morph <- readRDS("./output/models/deli_morph.rds")
+    } else {
+      # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
+      deli_morph <- readRDS("./output/models/deli_morph.rds")
   }
 
   # Testing how SVL, weight and tail length are impacted by temperature and egg treatment conditioning on age
@@ -195,9 +194,9 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 ############################################
 
 ### MAIN EFFECTS MODEL: The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
-   svl  <- bf(SVL    ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-  mass  <- bf(Weigth ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
-  tail  <- bf(Tail   ~ 1 + temp + egg_treat+ (1|clutch)) + gaussian()
+   svl  <- bf(SVL    ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
+  mass  <- bf(Weigth ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
+  tail  <- bf(Tail   ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
 
 if(refit){
   guich_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
@@ -207,19 +206,32 @@ if(refit){
   guich_morph <- add_criterion(guich_morph, "waic")
 }
 
+
+## MAIN EFFECTS MODEL: with age controlled
+  if(refit){
+    svl  <- bf(SVL    ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+  mass  <- bf(Weigth ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+  tail  <- bf(Tail   ~ 1 + temp+egg_treat  + scaleage + (1|clutch)) + gaussian()
+
+  guich_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_simple", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
+
+  } else{
+    guich_morph_simple <- readRDS("./output/models/guich_morph_simple.rds")
+  }
+
 ### INTERACTION MODEL: do temp and maternal interact?
 
-  svl   <- bf(SVL     ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-  mass  <- bf(Weigth  ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-  tail  <- bf(Tail    ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+    svl   <- bf(SVL     ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+    mass  <- bf(Weigth  ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+    tail  <- bf(Tail    ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-if(refit){
-  guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_int", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
-  guich_morph_int
-} else {
-  guich_morph_int <- readRDS("./output/models/guich_morph_int.rds")
-  guich_morph_int <- add_criterion(guich_morph_int, "waic")
-}
+  if(refit){
+    guich_morph_int <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_int", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
+    guich_morph_int
+  } else {
+    guich_morph_int <- readRDS("./output/models/guich_morph_int.rds")
+    guich_morph_int <- add_criterion(guich_morph_int, "waic")
+  }
 
 #no 2-way interaction significant
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
