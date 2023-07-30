@@ -12,7 +12,6 @@
     dat<-read.csv( "./data/dataset_reclean_git.csv")
 
   ## Data cleaning and organisation
-    str(dat)
     dat$time_tohide<-as.numeric(dat$Time_hide_sec)  
     dat$time_hiding<-as.numeric(dat$Time_snout_sec)
     dat$time_active<-as.numeric(dat$Time_emerge_sec)
@@ -136,7 +135,8 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 
     } else {
       # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
-      deli_morph <- readRDS("./output/models/deli_morph.rds")
+           deli_morph <- readRDS("./output/models/deli_morph.rds")
+      deli_morph_waic <- waic(deli_morph)
   }
 
   # Testing how SVL, weight and tail length are impacted by temperature and egg treatment conditioning on age
@@ -146,19 +146,20 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 
   if(refit){
     
-    deli_morph_simple <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_simple", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
+    deli_morph_age <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_age", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 
   } else {
     # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
-    deli_morph_simple <- readRDS("./output/models/deli_morph_simple.rds")
+         deli_morph_age <- readRDS("./output/models/deli_morph_age.rds")
+    deli_morph_age_waic <- waic(deli_morph_age)
   }
  
 
   ### INTERACTION MODEL: do temp and maternal interact?
 
-  svl   <- bf(SVL    ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-  mass  <- bf(Weigth ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
-  tail  <- bf(Tail   ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  svl   <- bf(SVL    ~ 1 + temp*egg_treat + (1|clutch)) + gaussian()
+  mass  <- bf(Weigth ~ 1 + temp*egg_treat + (1|clutch)) + gaussian()
+  tail  <- bf(Tail   ~ 1 + temp*egg_treat + (1|clutch)) + gaussian()
 
   if(refit){
     
@@ -167,15 +168,27 @@ morph$egg_treat <- as.factor(morph$egg_treat)
   } else {
     
     deli_morph_int <- readRDS("./output/models/deli_morph_int.rds")
-    deli_morph_int <- add_criterion(deli_morph_int, "waic")
+    deli_morph_int_waic <- waic(deli_morph_int)
+  }
+
+  # With age
+  svl   <- bf(SVL    ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  mass  <- bf(Weigth ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+  tail  <- bf(Tail   ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
+
+  if(refit){
+    
+    deli_morph_int_age <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
+
+  } else {
+    deli_morph_int_age <- readRDS("./output/models/deli_morph_int_age.rds")
+    deli_morph_int_age_waic <- waic(deli_morph_int_age)
   }
 
   ### MODEL SELECTION - WAIC - Compare models with main effects vs interaction. Which one is best supported?
 
-    mod_compare_int  <- waic(deli_morph_int)
-    mod_compare_main <- waic(deli_morph)
-
-        mod_tab_deli <- loo_compare(mod_compare_int, mod_compare_main) # Lowest waic is best supported.
+            mod_tab_deli <- loo_compare(deli_morph_waic, deli_morph_int_waic) # Lowest waic is best supported. No interaction supported
+        mod_tab_deli_age <- loo_compare(deli_morph_age_waic, deli_morph_int_age_waic) # Lowest waic is best supported. No interaction supported
 
 #no 2-way interactions
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
