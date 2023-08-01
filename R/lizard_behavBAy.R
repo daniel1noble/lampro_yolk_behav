@@ -298,9 +298,9 @@ if(refit){
 #####################################
 
 #SVL differs between temps so scale to add as covariate
-dat2$svldeli <- scale(dat2$SVL)
-dat3$svlguich <- scale(dat3$SVL)
-mean2$svldelimean <- scale(mean2$SVL)
+      dat2$svldeli <- scale(dat2$SVL)
+     dat3$svlguich <- scale(dat3$SVL)
+ mean2$svldelimean <- scale(mean2$SVL)
 mean3$svlguichmean <- scale(mean3$SVL)
 
 hist (log(dat2$speed_1m_s))
