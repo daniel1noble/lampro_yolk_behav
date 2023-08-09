@@ -177,7 +177,7 @@ morph$egg_treat <- as.factor(morph$egg_treat)
       mass  <- bf(Weigth ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
       tail  <- bf(Tail   ~ 1 + temp*egg_treat  + scaleage + (1|clutch)) + gaussian()
 
-    deli_morph_int_age <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
+    deli_morph_int_age <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_int_age", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
 
   } else {
     deli_morph_int_age <- readRDS("./output/models/deli_morph_int_age.rds")
