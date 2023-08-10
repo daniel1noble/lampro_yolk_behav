@@ -1,3 +1,27 @@
+#' @title extract_post
+ #' @param model The 'brms' model object
+ #' @param trait A character string with the name of the trait in the data set
+ extract_post <- function(model, trait){
+		post <- posterior_samples(model, pars = paste0("^b_", trait))
+
+		# Calculate means for each level from fixed effects
+				       intercept <- paste0("b_", trait, "_Intercept")
+				egg_treatcontrol <- paste0("b_", trait, "_egg_treatcontrol")
+				         temphot <- paste0("b_", trait, "_temphot")
+	    egg_treatcontrol_temphot <- paste0("b_", trait, "_temphot:egg_treatcontrol")
+
+           A_23 <- post[,intercept]
+           A_28 <- post[,intercept] + post[,temphot]
+           C_23 <- post[,intercept] + post[,egg_treatcontrol]
+           C_28 <- post[,intercept] + post[,temphot] + post[,egg_treatcontrol] + post[,egg_treatcontrol_temphot]
+
+		   return(data.frame(A23 = A_23,
+							 A28 = A_28,
+							 C23 = C_23,
+							 C28 = C_28))
+}
+
+
  #' @title pMCMC Function
  #' @param x The vector for the posterior distribution. Note that this will test the null hypothesis that the parameter of interest is significantly different from 0. 
  #' @param null A numeric value decsribing what the null hypothesis should be
