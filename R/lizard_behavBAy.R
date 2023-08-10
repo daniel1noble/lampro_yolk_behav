@@ -189,25 +189,14 @@ morph$egg_treat <- as.factor(morph$egg_treat)
             mod_tab_deli <- loo_compare(deli_morph_waic, deli_morph_int_waic) # Lowest waic is best supported. No interaction supported
         mod_tab_deli_age <- loo_compare(deli_morph_age_waic, deli_morph_int_age_waic) # Lowest waic is best supported. No interaction supported
 
-  # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups
+  # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups and get the contrasts that are relevant.
          deli_svl <- extract_post(deli_morph_int, "SVL")
+         contrast_post(deli_svl)
       deli_weight <- extract_post(deli_morph_int, "Weigth")
+         contrast_post(deli_weight)
         deli_tail <- extract_post(deli_morph_int, "Tail")
-
-  # Compare the means between the treatment groups
-    # SVL
-      cold_yolk_SVL <- deli_svl[,"C23"] - deli_svl[,"A23"]; mean(cold_yolk_SVL); quantile(cold_yolk_SVL, c(0.025, 0.975)); pmcmc(cold_yolk_SVL) # No differece between cold yolk and control  
-       hot_yolk_SVL <- deli_svl[,"C28"] - deli_svl[,"A28"]; mean(hot_yolk_SVL); quantile(hot_yolk_SVL, c(0.025, 0.975));  pmcmc(hot_yolk_SVL) # No differece between hot yolk and control  
-      
-    # Weight  
-      cold_yolk_weight <- deli_weight[,"C23"] - deli_weight[,"A23"]; mean(cold_yolk_weight); quantile(cold_yolk_weight, c(0.025, 0.975)); pmcmc(cold_yolk_weight) # No differece between cold yolk and control  
-       hot_yolk_weight <- deli_weight[,"C28"] - deli_weight[,"A28"]; mean(hot_yolk_weight); quantile(hot_yolk_weight, c(0.025, 0.975));  pmcmc(hot_yolk_weight) # No differece between hot yolk and control
-    
-    # Tail
-      cold_yolk_tail <- deli_tail[,"C23"] - deli_tail[,"A23"]; mean(cold_yolk_tail); quantile(cold_yolk_tail, c(0.025, 0.975)); pmcmc(cold_yolk_tail) # No differece between cold yolk and control  
-       hot_yolk_tail <- deli_tail[,"C28"] - deli_tail[,"A28"]; mean(hot_yolk_tail); quantile(hot_yolk_tail, c(0.025, 0.975));  pmcmc(hot_yolk_tail) # No differece between hot yolk and control
-
-       
+        contrast_post(deli_tail)
+  
 ############################################
 # Morphology Models - guichenoti
 ############################################
