@@ -1,7 +1,7 @@
 #' @title extract_post
- #' @param model The 'brms' model object
- #' @param trait A character string with the name of the trait in the data set
- #' @return A data frame with the posterior distribution of the estimated means for each level of the fixed effects
+#' @param model The 'brms' model object
+#' @param trait A character string with the name of the trait in the data set
+#' @return A data frame with the posterior distribution of the estimated means for each level of the fixed effects
  extract_post <- function(model, trait){
 		post <- posterior_samples(model, pars = paste0("^b_", trait))
 
@@ -22,6 +22,20 @@
 							 C28 = C_28))
 }
 
+
+#' @title contrast_post
+#' @param posterior_data The dataframe that contains the posterior distribution of the estimated means for each level of the fixed effects
+#' @return A data frame with the contrast along with 95% CI, pmcmc and contrast name. 
+contrast_post <- function(posterior_data){
+
+	    cold <- (posterior_data[,"C23"] - posterior_data[,"A23"])  
+         hot <- (posterior_data[,"C28"] - posterior_data[,"A28"])
+	   
+	   table <- data.frame(rbind(cold  %>% posterior_summary(), hot %>% posterior_summary()))
+	   table <- table %>% mutate(p = c(pmcmc(cold), pmcmc(hot)),
+	   							contrast  = c("C23 - A23", "C28 - A28"))  %>% select(contrast, everything())
+	return(table)
+}
 
  #' @title pMCMC Function
  #' @param x The vector for the posterior distribution. Note that this will test the null hypothesis that the parameter of interest is significantly different from 0. 
