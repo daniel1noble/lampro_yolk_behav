@@ -189,25 +189,25 @@ morph$egg_treat <- as.factor(morph$egg_treat)
             mod_tab_deli <- loo_compare(deli_morph_waic, deli_morph_int_waic) # Lowest waic is best supported. No interaction supported
         mod_tab_deli_age <- loo_compare(deli_morph_age_waic, deli_morph_int_age_waic) # Lowest waic is best supported. No interaction supported
 
-# Explore in the means for the various groups
-post_deli_morph_SVL <- posterior_samples(deli_morph_int, pars = "^b_SVL")
-  
-  # Calculate
-      A_23_deli_svl <- post_deli_morph_SVL[,1]
+  # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups
+         deli_svl <- extract_post(deli_morph_int, "SVL")
+      deli_weight <- extract_post(deli_morph_int, "Weigth")
+        deli_tail <- extract_post(deli_morph_int, "Tail")
 
+  # Compare the means between the treatment groups
+    # SVL
+      cold_yolk_SVL <- deli_svl[,"C23"] - deli_svl[,"A23"]; mean(cold_yolk_SVL); quantile(cold_yolk_SVL, c(0.025, 0.975)); pmcmc(cold_yolk_SVL) # No differece between cold yolk and control  
+       hot_yolk_SVL <- deli_svl[,"C28"] - deli_svl[,"A28"]; mean(hot_yolk_SVL); quantile(hot_yolk_SVL, c(0.025, 0.975));  pmcmc(hot_yolk_SVL) # No differece between hot yolk and control  
+      
+    # Weight  
+      cold_yolk_weight <- deli_weight[,"C23"] - deli_weight[,"A23"]; mean(cold_yolk_weight); quantile(cold_yolk_weight, c(0.025, 0.975)); pmcmc(cold_yolk_weight) # No differece between cold yolk and control  
+       hot_yolk_weight <- deli_weight[,"C28"] - deli_weight[,"A28"]; mean(hot_yolk_weight); quantile(hot_yolk_weight, c(0.025, 0.975));  pmcmc(hot_yolk_weight) # No differece between hot yolk and control
+    
+    # Tail
+      cold_yolk_tail <- deli_tail[,"C23"] - deli_tail[,"A23"]; mean(cold_yolk_tail); quantile(cold_yolk_tail, c(0.025, 0.975)); pmcmc(cold_yolk_tail) # No differece between cold yolk and control  
+       hot_yolk_tail <- deli_tail[,"C28"] - deli_tail[,"A28"]; mean(hot_yolk_tail); quantile(hot_yolk_tail, c(0.025, 0.975));  pmcmc(hot_yolk_tail) # No differece between hot yolk and control
 
-#no 2-way interactions
-#comparison of posteriors to see significant differences between groups in the 2-way interaction
-#morphdeli <- posterior_samples(deli_morph_int, pars = c("SVL"))
-#A_23_deli_morph <- morphdeli[,1]; mean(A_23_deli_morph); quantile(A_23_deli_morph, c(0.025, 0.975))
-#A_28_deli_morph <- morphdeli[,1]+ morphdeli[,2] ; mean(A_28_deli_morph); quantile(A_28_deli_morph, c(0.025, 0.975))
-#mean(A_28_deli_morph - A_23_deli_morph); quantile(A_28_deli_morph - A_23_deli_morph, c(0.025, 0.975))
-
-#morphdeli_tail <- posterior_samples(deli_morph_int, pars = c("Tail"))
-#A_23_deli_tail <- morphdeli_tail[,1]; mean(A_23_deli_tail); quantile(A_23_deli_tail, c(0.025, 0.975))
-#A_28_deli_tail <- morphdeli_tail[,1]+ morphdeli_tail[,2] ; mean(A_28_deli_tail); quantile(A_28_deli_tail, c(0.025, 0.975))
-#mean(A_28_deli_tail - A_23_deli_tail); quantile(A_28_deli_tail - A_23_deli_tail, c(0.025, 0.975))
-
+       
 ############################################
 # Morphology Models - guichenoti
 ############################################
