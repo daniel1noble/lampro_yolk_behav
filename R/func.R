@@ -1,6 +1,7 @@
 #' @title extract_post
  #' @param model The 'brms' model object
  #' @param trait A character string with the name of the trait in the data set
+ #' @return A data frame with the posterior distribution of the estimated means for each level of the fixed effects
  extract_post <- function(model, trait){
 		post <- posterior_samples(model, pars = paste0("^b_", trait))
 
