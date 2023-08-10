@@ -189,6 +189,13 @@ morph$egg_treat <- as.factor(morph$egg_treat)
             mod_tab_deli <- loo_compare(deli_morph_waic, deli_morph_int_waic) # Lowest waic is best supported. No interaction supported
         mod_tab_deli_age <- loo_compare(deli_morph_age_waic, deli_morph_int_age_waic) # Lowest waic is best supported. No interaction supported
 
+# Explore in the means for the various groups
+post_deli_morph_SVL <- posterior_samples(deli_morph_int, pars = "^b_SVL")
+  
+  # Calculate
+      A_23_deli_svl <- post_deli_morph_SVL[,1]
+
+
 #no 2-way interactions
 #comparison of posteriors to see significant differences between groups in the 2-way interaction
 #morphdeli <- posterior_samples(deli_morph_int, pars = c("SVL"))
