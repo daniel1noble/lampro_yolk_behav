@@ -22,6 +22,19 @@
 							 C28 = C_28))
 }
 
+#' @title contrast_post_main
+#' @param posterior_data The dataframe that contains the posterior distribution of the estimated means for each level of the fixed effects
+#' @return A data frame with the contrast along with 95% CI, pmcmc and contrast name for the main effects (pooled posteriors). 
+contrast_post_main <- function(posterior_data){
+
+	      temp <- c(posterior_data[,"C23"], posterior_data[,"A23"]) - (c(posterior_data[,"C28"], posterior_data[,"A28"]))
+		invest <- c(posterior_data[,"C23"], posterior_data[,"C28"]) - (c(posterior_data[,"A23"], posterior_data[,"A28"]))
+         
+	   table <- data.frame(rbind(temp  %>% posterior_summary(), invest %>% posterior_summary()))
+	   table <- table %>% mutate(pmcmc = c(pmcmc(temp), pmcmc(invest)),
+	   							contrast  = c("Temp (23-28)", "Invest (C-A)"))  %>% select(contrast, everything())
+	return(table)
+}
 
 #' @title contrast_post
 #' @param posterior_data The dataframe that contains the posterior distribution of the estimated means for each level of the fixed effects
