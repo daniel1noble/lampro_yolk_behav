@@ -10,6 +10,9 @@
 
   ## Load Data
     dat<-read.csv( "./data/dataset_reclean_git.csv")
+  
+  ## Functions
+  source("./R/func.R")
 
   ## Data cleaning and organisation
     dat$time_tohide<-as.numeric(dat$Time_hide_sec)  
@@ -192,10 +195,13 @@ morph$egg_treat <- as.factor(morph$egg_treat)
   # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups and get the contrasts that are relevant. Note that if you want to use the age corrected models then you should be aware that the means are for an averaged aged animal.
          deli_svl <- extract_post(deli_morph_int, "SVL")
          contrast_post(deli_svl)
+         contrast_post_main(deli_svl)
       deli_weight <- extract_post(deli_morph_int, "Weigth")
          contrast_post(deli_weight)
+         contrast_post_main(deli_weight)
         deli_tail <- extract_post(deli_morph_int, "Tail")
          contrast_post(deli_tail)
+         contrast_post_main(deli_tail)
   
 ############################################
 # Morphology Models - guichenoti
@@ -262,33 +268,18 @@ if(refit){
             mod_tab_guich <- loo_compare(guich_morph_waic, guich_morph_int_waic) # Lowest waic is best supported. No interaction supported
         mod_tab_guich_age <- loo_compare(guich_morph_age_waic, guich_morph_int_age_waic) # Lowest waic is best supported. No interaction supported
 
-#no 2-way interaction significant
-#comparison of posteriors to see significant differences between groups in the 2-way interaction
-
-#morphguich <- posterior_samples(guich_morph_int, pars = c("SVL"))
-#morphguich
-
-#A_23_guich_morph <- morphguich[,1]; mean(A_23_guich_morph); quantile(A_23_guich_morph, c(0.025, 0.975))
-#A_28_guich_morph <- morphguich[,1]+ morphguich[,2] ; mean(A_28_guich_morph); quantile(A_28_guich_morph, c(0.025, 0.975))
-#mean(A_28_guich_morph - A_23_guich_morph); quantile(A_28_guich_morph - A_23_guich_morph, c(0.025, 0.975))
-
-#C_23_g_morph <- morphguich[,1]+ morphguich[,3]; mean(C_23_g_morph); quantile(C_23_g_morph, c(0.025, 0.975))
-#C_28_g_morph <- morphguich[,1]+ morphguich[,5]; mean(C_28_g_morph); quantile(C_28_g_morph, c(0.025, 0.975))
-#mean(C_28_g_morph - C_23_g_morph); quantile(C_28_g_morph - C_23_g_morph, c(0.025, 0.975))
-
-#A_28_g_morph <- morphguich[,1]+ morphguich[,2]; mean(A_28_g_morph); quantile(A_28_g_morph, c(0.025, 0.975))
-#C_28_g_morph <- morphguich[,1]+ morphguich[,5]; mean(C_28_g_morph); quantile(C_28_g_morph, c(0.025, 0.975))
-#mean(C_28_g_morph - A_28_g_morph); quantile(C_28_g_morph - A_28_g_morph, c(0.025, 0.975))
-
-#morphg_tail <- posterior_samples(guich_morph_int, pars = c("Tail"))
-#A_23_g_tail <- morphg_tail[,1]; mean(A_23_g_tail); quantile(A_23_g_tail, c(0.025, 0.975))
-#A_28_g_tail <- morphg_tail[,1]+ morphg_tail[,2] ; mean(A_28_g_tail); quantile(A_28_g_tail, c(0.025, 0.975))
-#mean(A_28_g_tail - A_23_g_tail); quantile(A_28_g_tail - A_23_g_tail, c(0.025, 0.975))
-
-#C_23_g_tail <- morphg_tail[,1]+ morphg_tail[,3]; mean(C_23_g_tail); quantile(C_23_g_tail, c(0.025, 0.975))
-#C_28_g_tail <- morphg_tail[,1]+ morphg_tail[,5] ; mean(C_28_g_tail); quantile(C_28_g_tail, c(0.025, 0.975))
-#mean(C_28_g_tail - C_23_g_tail); quantile(C_28_g_tail - C_23_g_tail, c(0.025, 0.975))
-
+ # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups and get the contrasts that are relevant. Note that if you want to use the age corrected models then you should be aware that the means are for an averaged aged animal.
+         guich_svl <- extract_post(guich_morph_int, "SVL")
+         contrast_post(guich_svl)
+         contrast_post_main(guich_svl)
+      guich_weight <- extract_post(guich_morph_int, "Weigth")
+         contrast_post(guich_weight)
+          contrast_post_main(guich_weight)
+        guich_tail <- extract_post(guich_morph_int, "Tail")
+         contrast_post(guich_tail)
+         contrast_post_main(guich_tail)
+         
+  
 ######################################
 ##Analysis of running performance
 #####################################
