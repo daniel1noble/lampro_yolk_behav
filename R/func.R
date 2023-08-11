@@ -30,10 +30,11 @@ contrast_post <- function(posterior_data){
 
 	    cold <- (posterior_data[,"C23"] - posterior_data[,"A23"])  
          hot <- (posterior_data[,"C28"] - posterior_data[,"A28"])
-	   
-	   table <- data.frame(rbind(cold  %>% posterior_summary(), hot %>% posterior_summary()))
-	   table <- table %>% mutate(p = c(pmcmc(cold), pmcmc(hot)),
-	   							contrast  = c("C23 - A23", "C28 - A28"))  %>% select(contrast, everything())
+	   inter <- hot-cold
+
+	   table <- data.frame(rbind(cold  %>% posterior_summary(), hot %>% posterior_summary(), inter %>% posterior_summary()))
+	   table <- table %>% mutate(pmcmc = c(pmcmc(cold), pmcmc(hot), pmcmc(inter)),
+	   							contrast  = c("C23 - A23", "C28 - A28", "(C23 - A23) - (C28 - A28) (interaction)"))  %>% select(contrast, everything())
 	return(table)
 }
 
