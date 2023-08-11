@@ -480,7 +480,6 @@ summary (memerge1g)
 ############################################
 # Repeatability
 ############################################
-  source("./R/func.R")
 
 # Delicata
   # Extract posteriors
