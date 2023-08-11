@@ -189,13 +189,13 @@ morph$egg_treat <- as.factor(morph$egg_treat)
             mod_tab_deli <- loo_compare(deli_morph_waic, deli_morph_int_waic) # Lowest waic is best supported. No interaction supported
         mod_tab_deli_age <- loo_compare(deli_morph_age_waic, deli_morph_int_age_waic) # Lowest waic is best supported. No interaction supported
 
-  # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups and get the contrasts that are relevant.
+  # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups and get the contrasts that are relevant. Note that if you want to use the age corrected models then you should be aware that the means are for an averaged aged animal.
          deli_svl <- extract_post(deli_morph_int, "SVL")
          contrast_post(deli_svl)
       deli_weight <- extract_post(deli_morph_int, "Weigth")
          contrast_post(deli_weight)
         deli_tail <- extract_post(deli_morph_int, "Tail")
-        contrast_post(deli_tail)
+         contrast_post(deli_tail)
   
 ############################################
 # Morphology Models - guichenoti
