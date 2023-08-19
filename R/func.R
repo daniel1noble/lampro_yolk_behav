@@ -3,18 +3,25 @@
 #' @param model The 'brms' model object that models log (mass (grams))
 #' @param main Title of the plot
 #' @param xlab Label of the x-axis which defaults to 'Residuals'
-#' @return Returns z-transformed age (in SD units and cenetred on 0)
+#' @return Returns a plot of the histogram of residuals and a scatterplot of the observed and predicted values for each response variable
 brms_model_check <- function(model, main = NULL, xlab = "Residuals"){
-  
+  responses <- names(model$family)
+
+	par(mfrow = c(length(responses),2))
+
+  for(i in 1:length(responses)){
+
   # Histogram of residuals - assumed normal - pretty good to me
-      resid <-  model$data$lnMass - predict(model, summary = TRUE)[,"Estimate"]
+      resid <-  model$data[,responses[i]] - predict(model, summary = TRUE, resp = responses[i])[,"Estimate"]
  
   # Look at the residuals - should be normally distributed
-     hist(resid, main = main, xlab = xlab)
+     hist(resid, main = responses[i], xlab = xlab)
   
   # We already know roughly from R2 that model does good job predciting observed response, but lets have a look. Little bit of over/underpredciting but nothing serious
-      plot(model$data$lnMass ~ predict(model, summary = TRUE)[,"Estimate"], ylab = "Observed lnMass", xlab = "Predicted lnMass", main = main)
+      plot(model$data[,responses[i]] ~ predict(model, summary = TRUE, resp = responses[i])[,"Estimate"], ylab = "Observed lnMass", xlab = "Predicted lnMass", main = responses[i])
       abline(0,1, col = "red")
+}
+
 }
 
 #' @title extract_post
