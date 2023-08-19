@@ -139,6 +139,9 @@ morph$egg_treat <- as.factor(morph$egg_treat)
     deli_morph_int <- readRDS("./output/models/deli_morph_int.rds")
   }
 
+  # Checking model fit
+    brms_model_check(deli_morph_int)
+    
   # With age
 
   if(refit){
