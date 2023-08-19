@@ -1,3 +1,22 @@
+#' @title brms_model_check
+#' @description Checks a 'brms' model by plotting a histogram of residuals and a scatterplot of the observed and predcited log mass
+#' @param model The 'brms' model object that models log (mass (grams))
+#' @param main Title of the plot
+#' @param xlab Label of the x-axis which defaults to 'Residuals'
+#' @return Returns z-transformed age (in SD units and cenetred on 0)
+brms_model_check <- function(model, main = NULL, xlab = "Residuals"){
+  
+  # Histogram of residuals - assumed normal - pretty good to me
+      resid <-  model$data$lnMass - predict(model, summary = TRUE)[,"Estimate"]
+ 
+  # Look at the residuals - should be normally distributed
+     hist(resid, main = main, xlab = xlab)
+  
+  # We already know roughly from R2 that model does good job predciting observed response, but lets have a look. Little bit of over/underpredciting but nothing serious
+      plot(model$data$lnMass ~ predict(model, summary = TRUE)[,"Estimate"], ylab = "Observed lnMass", xlab = "Predicted lnMass", main = main)
+      abline(0,1, col = "red")
+}
+
 #' @title extract_post
 #' @param model The 'brms' model object
 #' @param trait A character string with the name of the trait in the data set
