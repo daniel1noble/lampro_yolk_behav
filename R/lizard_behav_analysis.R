@@ -126,40 +126,7 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 # Morphology Models - delicata
 ############################################
 
-  # MAIN EFFECTS MODEL: The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
-      # WIthout age
- 
-  refit <- FALSE
-  if(refit){
-           svl  <- bf(SVL    ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
-          mass  <- bf(Weigth ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
-          tail  <- bf(Tail   ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
-      
-      deli_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_morph", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
-
-    } else {
-      # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
-           deli_morph <- readRDS("./output/models/deli_morph.rds")
-      deli_morph_waic <- waic(deli_morph)
-  }
-
-  # Testing how SVL, weight and tail length are impacted by temperature and egg treatment conditioning on age
-  
-  if(refit){
-      svl   <- bf(SVL    ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
-      mass  <- bf(Weigth ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
-      tail  <- bf(Tail   ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
-
-    deli_morph_age <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_morph_age", file_refit = "on_change", data = morph2, control = list(adapt_delta = 0.98))
-
-  } else {
-    # If the loading doesn't happen automatically then load the model from the file. You should NOT have to refit the model each time
-         deli_morph_age <- readRDS("./output/models/deli_morph_age.rds")
-    deli_morph_age_waic <- waic(deli_morph_age)
-  }
- 
-
-  ### INTERACTION MODEL: do temp and maternal interact?
+  ### INTERACTION MODEL: do temp and maternal interact? We can get everything we need (main effects etc) form this model.
   if(refit){
       svl   <- bf(SVL    ~ 1 + temp*egg_treat + (1|clutch)) + gaussian()
       mass  <- bf(Weigth ~ 1 + temp*egg_treat + (1|clutch)) + gaussian()
@@ -170,7 +137,6 @@ morph$egg_treat <- as.factor(morph$egg_treat)
   } else {
     
     deli_morph_int <- readRDS("./output/models/deli_morph_int.rds")
-    deli_morph_int_waic <- waic(deli_morph_int)
   }
 
   # With age
@@ -184,13 +150,7 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 
   } else {
     deli_morph_int_age <- readRDS("./output/models/deli_morph_int_age.rds")
-    deli_morph_int_age_waic <- waic(deli_morph_int_age)
   }
-
-  ### MODEL SELECTION - WAIC - Compare models with main effects vs interaction. Which one is best supported?
-
-            mod_tab_deli <- loo_compare(deli_morph_waic, deli_morph_int_waic) # Lowest waic is best supported. No interaction supported
-        mod_tab_deli_age <- loo_compare(deli_morph_age_waic, deli_morph_int_age_waic) # Lowest waic is best supported. No interaction supported
 
   # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups and get the contrasts that are relevant. Note that if you want to use the age corrected models then you should be aware that the means are for an averaged aged animal.
          deli_svl <- extract_post(deli_morph_int, "SVL")
