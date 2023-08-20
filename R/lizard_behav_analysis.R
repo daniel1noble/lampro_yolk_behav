@@ -155,6 +155,9 @@ morph$egg_treat <- as.factor(morph$egg_treat)
     deli_morph_int_age <- readRDS("./output/models/deli_morph_int_age.rds")
   }
 
+  # Checking model fit
+    brms_model_check(deli_morph_int_age)
+
   # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups and get the contrasts that are relevant. Note that if you want to use the age corrected models then you should be aware that the means are for an averaged aged animal.
          deli_svl <- extract_post(deli_morph_int, "SVL")
          contrast_post(deli_svl)
@@ -170,36 +173,7 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 # Morphology Models - guichenoti
 ############################################
 
-### MAIN EFFECTS MODEL: The model. Intercept only controlling for ID and clutch. Most varibales are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
-
-if(refit){
-     svl  <- bf(SVL    ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
-    mass  <- bf(Weigth ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
-    tail  <- bf(Tail   ~ 1 + temp + egg_treat + (1|clutch)) + gaussian()
-
-  guich_morph <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
-
-} else {
-       guich_morph <- readRDS("./output/models/guich_morph.rds")
-  guich_morph_waic <- waic(guich_morph)
-}
-
-
-## MAIN EFFECTS MODEL: with age controlled
-  if(refit){
-
-    svl  <- bf(SVL    ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
-   mass  <- bf(Weigth ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
-   tail  <- bf(Tail   ~ 1 + temp + egg_treat  + scaleage + (1|clutch)) + gaussian()
-
-  guich_morph_age <- brms::brm(svl + mass + tail  + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_morph_age", file_refit = "on_change", data = morph3, control = list(adapt_delta = 0.98))
-
-  } else{
-    guich_morph_age <- readRDS("./output/models/guich_morph_age.rds")
-    guich_morph_age_waic <- waic(guich_morph_age)
-  }
-
-### INTERACTION MODEL: do temp and maternal interact?
+### INTERACTION MODEL: do temp and maternal interact? We can also extract the main effects from this model. See below.
       
   if(refit){
     svl   <- bf(SVL     ~ 1 + temp*egg_treat + (1|clutch)) + gaussian()
@@ -210,8 +184,10 @@ if(refit){
     
   } else {
          guich_morph_int <- readRDS("./output/models/guich_morph_int.rds")
-    guich_morph_int_waic <- waic(guich_morph_int)
   }
+
+    # Checking model fit
+    brms_model_check(guich_morph_int)
 
   # Age model
   if(refit){
@@ -223,13 +199,10 @@ if(refit){
     
   } else {
          guich_morph_int_age <- readRDS("./output/models/guich_morph_int_age.rds")
-    guich_morph_int_age_waic <- waic(guich_morph_int_age)
   }
 
- ### MODEL SELECTION - WAIC - Compare models with main effects vs interaction. Which one is best supported?
-
-            mod_tab_guich <- loo_compare(guich_morph_waic, guich_morph_int_waic) # Lowest waic is best supported. No interaction supported
-        mod_tab_guich_age <- loo_compare(guich_morph_age_waic, guich_morph_int_age_waic) # Lowest waic is best supported. No interaction supported
+  # Checking model fit
+    brms_model_check(guich_morph_int_age)
 
  # Extract the posteriors for each trait from the model and calculate the mean for each of the treatment groups and get the contrasts that are relevant. Note that if you want to use the age corrected models then you should be aware that the means are for an averaged aged animal.
          guich_svl <- extract_post(guich_morph_int, "SVL")
