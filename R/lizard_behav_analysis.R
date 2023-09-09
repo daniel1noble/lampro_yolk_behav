@@ -467,7 +467,15 @@ summary (memerge1g)
        speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
 
     # Delicata
-        deli_behav_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_int", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+    if(rerun){
+        
+        deli_behav_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, data = dat2, control = list(adapt_delta = 0.98))
+
+        saveRDS(deli_behav_int, "./output/models/deli_behav_int.rds")
+        
+        } else{
+          deli_behav_int <- readRDS("./output/models/deli_behav_int.rds")
+        }
         deli_behav_int
       # Time snout
         ts <- posterior_samples(deli_behav_int, pars = c("Timeemergesec"))
@@ -502,7 +510,12 @@ summary (memerge1g)
               speed_per_int <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
         
+        if(rerun){
         guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+          saveRDS(guich_mv_int, "./output/models/guich_mv_int.rds")
+        } else{
+          guich_mv_int <- readRDS("./output/models/guich_mv_int.rds")
+        }
         guich_mv_int
       
       # Time snout
