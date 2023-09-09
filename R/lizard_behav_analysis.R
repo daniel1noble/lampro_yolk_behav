@@ -476,29 +476,11 @@ summary (memerge1g)
         } else{
           deli_behav_int <- readRDS("./output/models/deli_behav_int.rds")
         }
-        deli_behav_int
-      # Time snout
-        ts <- posterior_samples(deli_behav_int, pars = c("Timeemergesec"))
-        # I want the mean of A_23
-        A_23_deli <- ts[,1]; mean(A_23_deli); quantile(A_23_deli, c(0.025, 0.975))
-        A_28_deli <- ts[,1]+ ts[,2] ; mean(A_28_deli); quantile(A_28_deli, c(0.025, 0.975))
-        constrast_deli <-  A_28_deli - A_23_deli
-        constrast_deli
-        library("SimBIID")
-        mean(A_28_deli - A_23_deli); quantile(A_28_deli - A_23_deli, c(0.025, 0.975)); pMCMC(A_28_deli - A_23_deli)
-        
-        ts
-        A_28_deli <- ts[,1]+ts[,2]; mean(A_28_deli); quantile(A_28_deli, c(0.025, 0.975))
-        C_28_deli <- ts[,1]+ts[,2]+ts[,3]; mean(C_28_deli); quantile(C_28_deli, c(0.025, 0.975))
-        mean(A_28_deli - C_28_deli); quantile(A_28_deli - C_28_deli, c(0.025, 0.975))
-        
-        A_23_deli <- ts[,1]; mean(A_23_deli); quantile(A_23_deli, c(0.025, 0.975))
-        A_28_deli <- ts[,1]+ ts[,2]; mean(A_28_deli); quantile(C_28_deli, c(0.025, 0.975))
-        mean(A_28_deli - A_23_deli); quantile(A_28_deli - A_23_deli, c(0.025, 0.975))
-        
-        A_23_deli <- ts[,1]; mean(A_23_deli); quantile(A_23_deli, c(0.025, 0.975))
-        C_23_deli <- ts[,1]+ ts[,3]; mean(C_23_deli); quantile(C_23_deli, c(0.025, 0.975))
-        mean(C_23_deli - A_23_deli); quantile(C_23_deli - A_23_deli, c(0.025, 0.975))
+      
+      # emergence time (Timeemergesec)
+       Timeemergesec_post <- extract_post(deli_behav_int, "Timeemergesec")
+         contrast_post(Timeemergesec_post)
+         contrast_post_main(Timeemergesec_post)
         
         
     # Guichenoti
@@ -512,7 +494,9 @@ summary (memerge1g)
         
         if(rerun){
         guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+
           saveRDS(guich_mv_int, "./output/models/guich_mv_int.rds")
+          
         } else{
           guich_mv_int <- readRDS("./output/models/guich_mv_int.rds")
         }
