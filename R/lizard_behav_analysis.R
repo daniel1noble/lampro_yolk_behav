@@ -169,6 +169,7 @@ morph$egg_treat <- as.factor(morph$egg_treat)
          contrast_post(deli_tail)
          contrast_post_main(deli_tail)
   
+
 ############################################
 # Morphology Models - guichenoti
 ############################################
@@ -216,118 +217,6 @@ morph$egg_treat <- as.factor(morph$egg_treat)
          contrast_post_main(guich_tail)
          
   
-######################################
-##Analysis of running performance
-#####################################
-
-#SVL differs between temps so scale to add as covariate
-      dat2$svldeli <- scale(dat2$SVL)
-     dat3$svlguich <- scale(dat3$SVL)
- mean2$svldelimean <- scale(mean2$SVL)
-mean3$svlguichmean <- scale(mean3$SVL)
-
-hist (log(dat2$speed_1m_s))
-mveldel<-lmer(log(speed_1m_s)~temp*maternal+svldeli+(1|id), data=dat2)
-hist(residuals(mveldel))
-summary(mveldel)
-plot(mveldel)
-
-mveldel1<-lmer(log(speed_1m_s)~temp+maternal+svldeli+(1|id), data=dat2)
-hist(residuals(mveldel1))
-summary(mveldel1)
-#plot(mveldel)
-
-mveldel2<-lmer(log(burst_25cm)~temp*maternal+svldeli+(1|id), data=dat2)
-hist(residuals(mveldel2))
-summary(mveldel2)
-
-mveldel3<-lmer(log(burst_25cm)~temp+maternal+svldeli+(1|id), data=dat2)
-hist(residuals(mveldel3))
-summary(mveldel3)
-
-#########################################
-### Antipredatory Behaviour
-#########################################
-
-#deli
-
-#ind as random
-
-mactivity<-lmer(Distance.moved~temp*maternal+svldeli+(1|id), data=dat2)
-hist(residuals(mactivity))
-shapiro.test(residuals(mactivity))
-plot(mactivity)
-summary(mactivity)
-
-mactivity.2<-lmer(Distance.moved~temp+maternal+svldeli+(1|id), data=dat2)
-hist(residuals(mactivity.2))
-shapiro.test(residuals(mactivity.2))
-plot(mactivity.2)
-summary(mactivity.2)
-
-sim2 <- simulateResiduals(glmmTMB(Movement ~ temp*maternal+svldeli+(1|id), data=dat2, family="gaussian"))
-testResiduals(sim2)#not bad   
-
-msnout<-lmer(Time_snout_sec~temp*maternal+svldeli+(1|id), data=dat2)
-hist(residuals(msnout))
-shapiro.test(residuals(msnout))
-#plot(msnout)
-summary (msnout)#no interaction. Simplify model
-
-msnout1<-lmer(Time_snout_sec~temp+maternal+svldeli+(1|id), data=dat2)
-hist(residuals(msnout1))
-shapiro.test(residuals(msnout1))
-summary (msnout1)
-
-memerge<-lmer(Time_emerge_sec~temp*maternal+svldeli+(1|id), data=dat2)
-hist(residuals(memerge))
-shapiro.test(residuals(memerge))
-#plot(memerge)
-summary (memerge)#no interaction. Simplify model
-
-memerge1<-lmer(Time_emerge_sec~temp+maternal+svldeli+(1|id), data=dat2)
-hist(residuals(memerge1))
-shapiro.test(residuals(memerge1))
-summary (memerge1)
-
-
-#####guich
-
-#ind as random
-
-mactivityg<-lmer(Distance.moved~temp*maternal+svlguich+(1|id), data=dat3)
-hist(residuals(mactivityg))
-shapiro.test(residuals(mactivityg))
-plot(mactivityg)
-summary(mactivityg)
-
-mactivity1g<-lmer(Distance.moved~temp+maternal+svlguich+(1|id), data=dat3)
-hist(residuals(mactivity1g))
-shapiro.test(residuals(mactivity1g))
-plot(mactivity1g)
-summary(mactivity1g)
-
-msnoutg<-lmer(log(Time_snout_sec)~temp*maternal+svlguich+(1|id), data=dat3)
-hist(residuals(msnoutg))
-shapiro.test(residuals(msnoutg))
-#plot(msnout)
-summary (msnoutg)#no interaction. Simplify model
-
-msnout1g<-lmer(log(Time_snout_sec)~temp+maternal+svlguich+(1|id), data=dat3)
-hist(residuals(msnout1g))
-shapiro.test(residuals(msnout1g))
-summary (msnout1g)
-
-memergeg<-lmer(Time_emerge_sec~temp*maternal+svlguich+(1|id), data=dat3)
-hist(residuals(memergeg))
-shapiro.test(residuals(memergeg))
-#plot(memerge)
-summary (memergeg)#no interaction. Simplify model
-
-memerge1g<-lmer(Time_emerge_sec~temp+maternal+svlguich+(1|id), data=dat3)
-hist(residuals(memerge1g))
-shapiro.test(residuals(memerge1g))
-summary (memerge1g)
 
 #############################################
 # Bayesian Multivariate models - Part I
@@ -451,12 +340,8 @@ summary (memerge1g)
           deli_behav_int <- readRDS("./output/models/deli_behav_int.rds")
         }
       
-      # emergence time (Timeemergesec)
-       Timeemergesec_post <- extract_post(deli_behav_int, "Timeemergesec")
-         contrast_post(Timeemergesec_post)
-         contrast_post_main(Timeemergesec_post)
-        
-        
+        deli_svl <- build_behav_table(deli_behav_int)
+    
     # Guichenoti
 
         #all but distance moved loged. Differnet from deli
@@ -467,36 +352,15 @@ summary (memerge1g)
         speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
         
         if(rerun){
-        guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+          guich_mv_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
 
           saveRDS(guich_mv_int, "./output/models/guich_mv_int.rds")
           
         } else{
           guich_mv_int <- readRDS("./output/models/guich_mv_int.rds")
         }
-        guich_mv_int
       
-      # Time snout
-        ts_guich <- posterior_samples(guich_mv_int, pars = c("^b_logTimeSnout"))
-        # I want the mean of A_23
-        A_23_guich <- ts_guich[,1]; mean(A_23_guich); quantile(A_23_guich, c(0.025, 0.975))
-        A_28_guich <- ts_guich[,1]+ ts_guich[,2] ; mean(A_28_guich); quantile(A_28_guich, c(0.025, 0.975))
-        constrast_guich <-  A_28_guich - A_23_guich
-        
-        #checking intreaction in 25cm burst
-        b25_guich <- posterior_samples(guich_mv_int, pars = c("logspeedburst"))
-        b25_guich
-        C_23_g <- b25_guich[,1]+b25_guich[,3]; mean(C_23_g); quantile(C_23_g, c(0.025, 0.975))
-        C_28_g <- b25_guich[,1]+ b25_guich[,2]+b25_guich[,3]; mean(C_28_g); quantile(C_28_g, c(0.025, 0.975))
-        mean(C_23_g - C_28_g); quantile(C_23_g - C_28_g, c(0.025, 0.975))#NS
-        
-        C_23_g <- b25_guich[,1]+b25_guich[,3]; mean(C_23_g); quantile(C_23_g, c(0.025, 0.975))
-        A_23_g <- b25_guich[,1]; mean(A_23_g); quantile(A_23_g, c(0.025, 0.975))
-        mean(C_23_g - A_23_g); quantile(C_23_g - A_23_g, c(0.025, 0.975))
-
-      
-        # Is the magnitude of difference between 23 and 28 the same for guich and deli?
-        mean(constrast_deli - constrast_guich); quantile(constrast_deli - constrast_guich, c(0.025, 0.975)); pmcmc(constrast_deli - constrast_guich)
+       guich_svl <- build_behav_table(guich_mv_int)
 
 ############################################
 # Bayesian Multivariate models - Part III
@@ -519,15 +383,15 @@ summary (memerge1g)
         
     #Guich
         #2-way
-        tim_emerge_ap_int2  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        tim_snout_ap_int2  <- bf(logTimeSnout    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        dist_move_ap_int2  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        speed_per_int2 <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        speed_burst_per_int2 <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+         tim_emerge_ap_int2  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+          tim_snout_ap_int2  <- bf(logTimeSnout          | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+          dist_move_ap_int2  <- bf(Distance.moved        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+              speed_per_int2 <- bf(logspeed_1m           | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+        speed_burst_per_int2 <- bf(logspeed_burst        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
         
         if(rerun){
-        guich_mv_int_nonSVL <- brms::brm(tim_emerge_ap_int2 + tim_snout_ap_int2 + dist_move_ap_int2 + speed_per_int2 + speed_burst_per_int2 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int_nonSVL", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
-        saveRDS(guich_mv_int_nonSVL, "./output/models/guich_mv_int_nonSVL.rds")
+          guich_mv_int_nonSVL <- brms::brm(tim_emerge_ap_int2 + tim_snout_ap_int2 + dist_move_ap_int2 + speed_per_int2 + speed_burst_per_int2 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int_nonSVL", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
+          saveRDS(guich_mv_int_nonSVL, "./output/models/guich_mv_int_nonSVL.rds")
         } else{
           guich_mv_int_nonSVL <- readRDS("./output/models/guich_mv_int_nonSVL.rds")
         }
