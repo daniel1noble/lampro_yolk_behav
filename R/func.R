@@ -42,7 +42,7 @@ build_behav_table <- function(model) {
 #' @param main Title of the plot
 #' @param xlab Label of the x-axis which defaults to 'Residuals'
 #' @return Returns a plot of the histogram of residuals and a scatterplot of the observed and predicted values for each response variable
-brms_model_check <- function(model, main = NULL, xlab = "Residuals"){
+brms_model_check <- function(model, xlab = "Residuals"){
   responses <- names(model$family)
 
 	par(mfrow = c(length(responses),2))
