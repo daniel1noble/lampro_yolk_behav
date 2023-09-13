@@ -345,8 +345,8 @@ morph$egg_treat <- as.factor(morph$egg_treat)
     # Guichenoti
 
         #all but distance moved loged. Differnet from deli
-         tim_emerge_ap_int  <- bf(logTime_emerge_sec | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-          tim_snout_ap_int  <- bf(logTimeSnout       | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+         tim_emerge_ap_int  <- bf(Time_emerge_sec | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+          tim_snout_ap_int  <- bf(Time_snout_sec       | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
           dist_move_ap_int  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
               speed_per_int <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
@@ -368,8 +368,8 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 ############################################
 
     # Deli
-         tim_emerge_ap_int1  <- bf(Time_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-          tim_snout_ap_int1  <- bf(Time_snout_sec     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+         tim_emerge_ap_int1  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+          tim_snout_ap_int1  <- bf(logTimeSnout          | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
           dist_move_ap_int1  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
               speed_per_int1 <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int1 <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
