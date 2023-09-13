@@ -1,3 +1,22 @@
+#' @title build_morph_table
+#' @description Builds the table for all morphology variables
+#' @param model The 'brms' model object that models log (mass (grams))
+#' @return Returns a dataframe with the main effects and interaction estimates for each morphology variables
+build_morph_table <- function(model) {
+	 svl <- extract_post(model, "SVL")
+         svl_all <- contrast_post(svl)
+        svl_main <-  contrast_post_main(svl)
+      weight <- extract_post(model, "Weigth")
+        weight_all <-  contrast_post(weight)
+          weight_main <- contrast_post_main(weight)
+        tail <- extract_post(model, "Tail")
+        tail_all <-  contrast_post(tail)
+         tail_main <- contrast_post_main(tail)
+
+		table <- data.frame(rbind(svl_all[3,], svl_main, weight_all[3,], weight_main, tail_all[3,], tail_main))
+		return(table)
+  }
+
 #' @title brms_model_check
 #' @description Checks a 'brms' model by plotting a histogram of residuals and a scatterplot of the observed and predcited log mass
 #' @param model The 'brms' model object that models log (mass (grams))
@@ -73,7 +92,7 @@ contrast_post <- function(posterior_data){
 
 	   table <- data.frame(rbind(cold  %>% posterior_summary(), hot %>% posterior_summary(), inter %>% posterior_summary()))
 	   table <- table %>% mutate(pmcmc = c(pmcmc(cold), pmcmc(hot), pmcmc(inter)),
-	   							contrast  = c("C23 - A23", "C28 - A28", "(C23 - A23) - (C28 - A28) (interaction)"))  %>% select(contrast, everything())
+	   							contrast  = c("C23 - A23", "C28 - A28", "Interaction [(C23 - A23) - (C28 - A28)]"))  %>% select(contrast, everything())
 	return(table)
 }
 
