@@ -17,6 +17,25 @@ build_morph_table <- function(model) {
 		return(table)
   }
 
+#' @title build_behav_table
+#' @description Builds the table for all behaviooural variables
+#' @param model The 'brms' model object that models log (mass (grams))
+#' @return Returns a dataframe with the main effects and interaction estimates for each behavioural variable
+build_behav_table <- function(model) {
+		responses <- names(deli_behav_int$family)
+	table <- list()
+	for(i in 1:length(responses)){
+  		  trait_post <- extract_post(deli_behav_int, trait = responses[i])
+           trait_all <- contrast_post(trait_post)
+		  trait_main <- contrast_post_main(trait_post)
+        
+		table[[i]] <- rbind(trait_all[3,], trait_main) %>%  mutate(dplyr::across(tidyselect::where(is.numeric), round, 3))
+		names(table)[i] <- responses[i]
+	}
+
+		return(plyr::ldply(table))
+  }
+
 #' @title brms_model_check
 #' @description Checks a 'brms' model by plotting a histogram of residuals and a scatterplot of the observed and predcited log mass
 #' @param model The 'brms' model object that models log (mass (grams))
