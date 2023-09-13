@@ -31,7 +31,7 @@ source(here::here("R", "func.R"))
 
 @tbl-tbl1
 
-```{r}
+```{r, tbl-tbl1}
 #| label: tbl-tbl1
 #| tbl-cap: Posterior means and 95% credible intervals for the interaction between temperature (Temp) and maternal investment (Invest) along with the main effects of temperature and maternal investment on mophological traits for *Lampropholis delicata* and *Lampropholis guichenoti*. Main effects are pooled posterior means over each level of second predictor variable.
 
@@ -48,4 +48,74 @@ source(here::here("R", "func.R"))
 	# Full table
 		full <- rbind(deli, guich)
 	flextable(full)  %>% autofit()  %>% align(align = "center", part = "all")  
+```
+
+## Performance and Behaviour
+
+@tbl-tbl2 
+
+@tbl-tblS3
+
+```{r, tbl-tbl2}
+#| label: tbl-tbl2
+#| tbl-cap: Posterior means and 95% credible intervals for the interaction between temperature (Temp) and maternal investment (Invest) along with the main effects of temperature and maternal investment on behavioural and performance traits for *Lampropholis delicata* and *Lampropholis guichenoti*. Main effects are pooled posterior means over each level of second predictor variable. Estimates are from a Bayesian multivariate (multi-response) model not controlling for SVL.
+
+# Load models
+   deli_behav_int_nonSVL <- readRDS(here::here("output/models/", "deli_behav_int_nonSVL.rds"))
+	 guich_mv_int_nonSVL <- readRDS(here::here("output/models/", "guich_mv_int_nonSVL.rds"))
+
+# Build tables
+	 deli_behav <- build_behav_table(deli_behav_int_nonSVL)  %>% 
+	 				mutate(Species = c("L. delicata", rep("", 14)),
+						Trait = c("log Emergence Time (s)", rep("", 2),
+								  "log Time Snout Out (s)", rep("", 2), 
+								  "Distance Moved (cm)", rep("", 2), 
+								  "log 1m Speed (cm/s)", rep("", 2),
+								  "log Burst Speed (cm/s)", rep("", 2)))  %>% 
+					select(Species, Trait, contrast, Estimate, Q2.5, Q97.5,pmcmc)
+	guich_behav <- build_behav_table(guich_mv_int_nonSVL)  %>% 
+					mutate(Species = c("L. guichenoti", rep("", 14)),
+							Trait = c("log Emergence Time (s)", rep("", 2),
+								      "log Time Snout Out (s)", rep("", 2), 
+								      "Distance Moved (cm)", rep("", 2), 
+								      "log 1m Speed (cm/s)", rep("", 2),
+								     "log Burst Speed (cm/s)", rep("", 2)))  %>% 
+					select(Species, Trait, contrast, Estimate, Q2.5, Q97.5,pmcmc)  
+
+# Full table
+		full2 <- rbind(deli_behav, guich_behav)
+	flextable(full2)  %>% autofit()  %>% align(align = "center", part = "all")  
+```
+
+
+```{r, tbl-tblS3}
+#| label: tbl-tblS3
+#| tbl-cap: Posterior means and 95% credible intervals for the interaction between temperature (Temp) and maternal investment (Invest) along with the main effects of temperature and maternal investment on behavioural and performance traits for *Lampropholis delicata* and *Lampropholis guichenoti*. Main effects are pooled posterior means over each level of second predictor variable. Estimates are from a Bayesian multivariate (multi-response) model controlling for SVL (Z-transformed).
+
+# Load models
+             deli_svl <- readRDS(here::here("output/models/", "deli_behav_int.rds"))
+	        guich_svl <- readRDS(here::here("output/models/", "guich_mv_int.rds"))
+
+# Build tables
+	 deli_behav <- build_behav_table(deli_svl)  %>% 
+	 				mutate(Species = c("L. delicata", rep("", 14)),
+						Trait = c("log Emergence Time (s)", rep("", 2),
+								  "log Time Snout Out (s)", rep("", 2), 
+								  "Distance Moved (cm)", rep("", 2), 
+								  "log 1m Speed (cm/s)", rep("", 2),
+								  "log Burst Speed (cm/s)", rep("", 2)))  %>% 
+					select(Species, Trait, contrast, Estimate, Q2.5, Q97.5,pmcmc)
+	guich_behav <- build_behav_table(guich_svl)  %>% 
+					mutate(Species = c("L. guichenoti", rep("", 14)),
+							Trait = c("log Emergence Time (s)", rep("", 2),
+								      "log Time Snout Out (s)", rep("", 2), 
+								      "Distance Moved (cm)", rep("", 2), 
+								      "log 1m Speed (cm/s)", rep("", 2),
+								     "log Burst Speed (cm/s)", rep("", 2)))  %>% 
+					select(Species, Trait, contrast, Estimate, Q2.5, Q97.5,pmcmc)  
+
+# Full table
+		full3 <- rbind(deli_behav, guich_behav)
+	flextable(full3)  %>% autofit()  %>% align(align = "center", part = "all")  
+
 ```
