@@ -1,0 +1,51 @@
+---
+title: "Title"
+format:
+  docx: default
+editor_options: 
+  chunk_output_type: console
+execute:
+  freeze: auto  # re-render only when source changes
+  cache: false
+  echo: false
+  warning: false
+  error: false
+  include: true
+crossref:
+  fig-title: 'Figure'
+  fig-labels: arabic
+  title-delim: "-"
+  fig-prefix: "Figure"
+  tbl-prefix: "Table"
+---
+
+```{r}
+#| label: setup
+
+pacman::p_load(tidyverse, flextable, here, dplyr, tidyselect, brms)
+source(here::here("R", "func.R"))
+```
+# Main Manuscript Tables
+
+## Morphology
+
+@tbl-tbl1
+
+```{r}
+#| label: tbl-tbl1
+#| tbl-cap: Posterior means and 95% credible intervals for the interaction between temperature (Temp) and maternal investment (Invest) along with the main effects of temperature and maternal investment on mophological traits for *Lampropholis delicata* and *Lampropholis guichenoti*. Main effects are pooled posterior means over each level of second predictor variable.
+
+	# Bring in models
+		deli_morph_int <- readRDS(here::here("output/models/", "deli_morph_int.rds"))
+	   guich_morph_int <- readRDS(here::here("output/models/", "guich_morph_int.rds"))
+
+	# Build tables
+		 deli <- build_morph_table(deli_morph_int)  %>% mutate(Species = c("L. delicata", rep("", 8)),
+		 													   Trait = c("SVL", rep("", 2), "Weight", rep("",2), "Tail", rep("",2)))  %>% select(Species, Trait, contrast, Estimate, Q2.5, Q97.5,pmcmc)  %>%  mutate(dplyr::across(tidyselect::where(is.numeric), round, 3))
+		guich <- build_morph_table(guich_morph_int) %>% mutate(Species = c("L. guichenoti", rep("", 8)),
+		 													   Trait = c("SVL", rep("", 2), "Weight", rep("",2), "Tail", rep("",2)))  %>% select(Species, Trait, contrast, Estimate, Q2.5, Q97.5,pmcmc)   %>%  mutate(dplyr::across(tidyselect::where(is.numeric), round, 3))
+	
+	# Full table
+		full <- rbind(deli, guich)
+	flextable(full)  %>% autofit()  %>% align(align = "center", part = "all")  
+```
