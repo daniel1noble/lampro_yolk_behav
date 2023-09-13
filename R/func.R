@@ -22,10 +22,10 @@ build_morph_table <- function(model) {
 #' @param model The 'brms' model object that models log (mass (grams))
 #' @return Returns a dataframe with the main effects and interaction estimates for each behavioural variable
 build_behav_table <- function(model) {
-		responses <- names(deli_behav_int$family)
+		responses <- names(model$family)
 	table <- list()
 	for(i in 1:length(responses)){
-  		  trait_post <- extract_post(deli_behav_int, trait = responses[i])
+  		  trait_post <- extract_post(model, trait = responses[i])
            trait_all <- contrast_post(trait_post)
 		  trait_main <- contrast_post_main(trait_post)
         
