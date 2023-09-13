@@ -381,6 +381,7 @@ morph$egg_treat <- as.factor(morph$egg_treat)
           deli_behav_int_nonSVL <- readRDS("./output/models/deli_behav_int_nonSVL.rds")
         }
         
+        deli_behav <- build_behav_table(deli_behav_int_nonSVL)
     #Guich
         #2-way
          tim_emerge_ap_int2  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
@@ -395,7 +396,8 @@ morph$egg_treat <- as.factor(morph$egg_treat)
         } else{
           guich_mv_int_nonSVL <- readRDS("./output/models/guich_mv_int_nonSVL.rds")
         }
-                                                      
+        guich_behav <- build_behav_table(guich_mv_int_nonSVL)                                      
+        
 ############################################
 ########### Figures ########################
 ############################################
