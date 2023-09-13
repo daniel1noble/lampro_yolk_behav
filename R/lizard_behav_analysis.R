@@ -6,7 +6,7 @@
 #########################################################
 ## Load Packages and Visualising Data
 #########################################################
-    pacman::p_load(rptR, brms, bayestestR, tidyverse)  
+    pacman::p_load(rptR, brms, bayestestR, tidyverse, patchwork)  
 
   ## Load Data
     dat<-read.csv( "./data/dataset_reclean_git.csv")
@@ -342,11 +342,16 @@ morph$egg_treat <- as.factor(morph$egg_treat)
       
         deli_svl <- build_behav_table(deli_behav_int)
     
+      # Model checking
+        pp_check(deli_behav_int, resp = "Timeemergesec")
+        brms_model_check_res(deli_behav_int)
+
+
     # Guichenoti
 
         #all but distance moved loged. Differnet from deli
-         tim_emerge_ap_int  <- bf(Time_emerge_sec | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-          tim_snout_ap_int  <- bf(Time_snout_sec       | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+         tim_emerge_ap_int  <- bf(Time_emerge_sec    | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
+          tim_snout_ap_int  <- bf(Time_snout_sec     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
           dist_move_ap_int  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
               speed_per_int <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
@@ -362,14 +367,19 @@ morph$egg_treat <- as.factor(morph$egg_treat)
       
        guich_svl <- build_behav_table(guich_mv_int)
 
+       # Model checking
+        pp_check(guich_mv_int, resp = "Timeemergesec")
+        brms_model_check_res(guich_mv_int)
+
+
 ############################################
 # Bayesian Multivariate models - Part III
 # Models without controlling for z_svl
 ############################################
 
     # Deli
-         tim_emerge_ap_int1  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-          tim_snout_ap_int1  <- bf(logTimeSnout          | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+         tim_emerge_ap_int1  <- bf(Time_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+          tim_snout_ap_int1  <- bf(Time_snout_sec      | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
           dist_move_ap_int1  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
               speed_per_int1 <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int1 <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
@@ -382,10 +392,15 @@ morph$egg_treat <- as.factor(morph$egg_treat)
         }
         
         deli_behav <- build_behav_table(deli_behav_int_nonSVL)
+
+        # Model checking
+        pp_check(deli_behav_int_nonSVL, resp = "Timeemergesec")
+        brms_model_check_res(deli_behav_int_nonSVL)
+
     #Guich
         #2-way
-         tim_emerge_ap_int2  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-          tim_snout_ap_int2  <- bf(logTimeSnout          | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+         tim_emerge_ap_int2  <- bf(Time_emerge_sec       | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+          tim_snout_ap_int2  <- bf(Time_snout_sec        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
           dist_move_ap_int2  <- bf(Distance.moved        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
               speed_per_int2 <- bf(logspeed_1m           | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int2 <- bf(logspeed_burst        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
@@ -396,7 +411,12 @@ morph$egg_treat <- as.factor(morph$egg_treat)
         } else{
           guich_mv_int_nonSVL <- readRDS("./output/models/guich_mv_int_nonSVL.rds")
         }
-        guich_behav <- build_behav_table(guich_mv_int_nonSVL)                                      
+        
+        guich_behav <- build_behav_table(guich_mv_int_nonSVL)  
+
+        # Model checking
+        pp_check(guich_mv_int_nonSVL, resp = "Timeemergesec")
+        brms_model_check_res(guich_mv_int_nonSVL)                                    
         
 ############################################
 ########### Figures ########################
