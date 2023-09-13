@@ -125,7 +125,7 @@ morph$egg_treat <- as.factor(morph$egg_treat)
 ############################################
 # Morphology Models - delicata
 ############################################
-
+  refit = FALSE
   ### INTERACTION MODEL: do temp and maternal interact? We can get everything we need (main effects etc) form this model.
   if(refit){
       svl   <- bf(SVL    ~ 1 + temp*egg_treat + (1|clutch)) + gaussian()
@@ -169,6 +169,9 @@ morph$egg_treat <- as.factor(morph$egg_treat)
          contrast_post(deli_tail)
          contrast_post_main(deli_tail)
   
+# Table
+  
+
 ############################################
 # Morphology Models - guichenoti
 ############################################
