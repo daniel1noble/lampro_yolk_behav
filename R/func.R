@@ -62,6 +62,38 @@ brms_model_check <- function(model, xlab = "Residuals"){
 
 }
 
+#' @title brms_model_check_res
+#' @description Checks a 'brms' model by plotting a histogram of residuals and a scatterplot of the stanadardised residuals and predcited response
+#' @param model The 'brms' model object that models log (mass (grams))
+#' @return Returns a plot of the histogram of residuals and a scatterplot of the observed and predicted values for each response variable
+brms_model_check_res <- function(model){
+  responses <- names(model$family)
+
+	par(mfrow = c(length(responses),3))
+
+  for(i in 1:length(responses)){
+
+  # Histogram of residuals - assumed normal - pretty good to me
+      resid <-  data.frame(residuals(model, resp = responses[i]))
+ 
+  # Look at the residuals - should be normally distributed
+    #p1 <-  ggplot(resid, aes(x = Estimate)) + geom_histogram() + labs(main = responses[i], xlab = xlab) + theme_classic()
+	hist(resid$Estimate,  main = responses[i], xlab = "Residuals")
+  
+  # We already know roughly from R2 that model does good job predciting observed response, but lets have a look. Little bit of over/underpredciting but nothing serious
+  res_df <- model$data %>% 
+	       mutate(predict_y = predict(model, resp = responses[i])[ , "Estimate"], 
+			      std_resid = residuals(model, type = "pearson", resp = responses[i])[ , "Estimate"])
+	
+	plot(predict_y ~ std_resid, data = res_df, xlab = "Standardised Residuals", ylab = "Predicted Response", main = responses[i])
+   #p2 <- ggplot(res_df, aes(predict_y, std_resid)) + geom_point(size = 0.8) + stat_smooth(se = FALSE) + labs(x = "Predicted Response", y = "Standardised Residuals", main = responses[i]) + theme_classic()
+
+	plot(res_df[,"predict_y"] ~ res_df[,grep(responses[i], gsub("[._]", "", colnames(res_df)))], xlab = "Predcited Response", ylab = "Observed", main = responses[i])
+	abline(a = 0, b = 1, col = "red")
+  }
+
+}
+
 #' @title extract_post
 #' @param model The 'brms' model object
 #' @param trait A character string with the name of the trait in the data set
