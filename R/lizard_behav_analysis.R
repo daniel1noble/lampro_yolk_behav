@@ -169,9 +169,6 @@ morph$egg_treat <- as.factor(morph$egg_treat)
          contrast_post(deli_tail)
          contrast_post_main(deli_tail)
   
-# Table
-  
-
 ############################################
 # Morphology Models - guichenoti
 ############################################
@@ -359,35 +356,21 @@ summary (memerge1g)
 #Transformations Maider (deli does no need to log-transform antipredatory behaviours)
     # The model. Intercept only controlling for ID and clutch. Most variables are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
 
-        tim_emerge_ap  <- bf(Time_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
-         tim_snout_ap  <- bf(Time_snout_sec  | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+        tim_emerge_ap  <- bf(logTime_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
+         tim_snout_ap  <- bf(logTimeSnout       | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
          dist_move_ap  <- bf(Distance.moved  | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
              speed_per <- bf(logspeed_1m     | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
        speed_burst_per <- bf(logspeed_burst  | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
 
     # Delicata
+      if(rerun){
         deli_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "./output/models/deli_mv", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
-        deli_mv
-    
-    # Calculate repeatability
-        # Extract posteriors
-              id_var <- posterior_samples(deli_mv, pars = c("^sd_id"))^2
-          clutch_var <- posterior_samples(deli_mv, pars = c("^sd_clutch"))^2
-          sigma_var  <- posterior_samples(deli_mv, pars = c("^sigma"))^2
-
-        # Calculate repeatability for all variables
-            R <- data.frame(mapply(function(x, y, z) x / (x+y+z), x = id_var, y = clutch_var, z = sigma_var))
-
-        # Mean R for each trait
-            R_mean <- colMeans(R)
-            R_u95 <- plyr::ldply(lapply(R, function(x) quantile(x,0.975)))
-            R_l95 <- plyr::ldply(lapply(R, function(x) quantile(x,0.025)))
-
-        # Table of repeatabilities
-            Rs <- cbind(R = R_mean, l = R_l95[,2], u = R_u95[,2])
-            Rs
-    
-    # Guichenoti
+        saveRDS(deli_mv, file = "./output/models/deli_mv.rds")
+        } else {
+           deli_mv <- readRDS("./output/models/deli_mv.rds")
+        }
+      
+        # Guichenoti
    
    tim_emerge_ap  <- bf(logTime_emerge_sec | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
     tim_snout_ap  <- bf(logTimeSnout       | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
@@ -395,26 +378,13 @@ summary (memerge1g)
         speed_per <- bf(logspeed_1m        | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
   speed_burst_per <- bf(logspeed_burst     | mi() ~ 1 + (1|q|id) + (1|clutch)) + gaussian()
    
+        if(rerun){
         guich_mv <- brms::brm(tim_emerge_ap + tim_snout_ap + dist_move_ap + speed_per + speed_burst_per + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/guich_mv", file_refit = "on_change", data = dat3, control = list(adapt_delta = 0.98))
-        guich_mv
-
-    # Calculate repeatability for all variables for Guichenoti
-        # Extract posteriors
-              id_var_guich <- posterior_samples(guich_mv, pars = c("^sd_id"))^2
-          clutch_var_guich <- posterior_samples(guich_mv, pars = c("^sd_clutch"))^2
-          sigma_var_guich  <- posterior_samples(guich_mv, pars = c("^sigma"))^2
-
-        # Calculate repeatability for all variables
-            R_guich <- data.frame(mapply(function(x, y, z) x / (x+y+z), x = id_var_guich, y = clutch_var_guich, z = sigma_var_guich))
-
-        # Mean R for each trait
-            R_mean_guich <- colMeans(R_guich)
-            R_u95_guich <- plyr::ldply(lapply(R_guich, function(x) quantile(x,0.975)))
-            R_l95_guich <- plyr::ldply(lapply(R_guich, function(x) quantile(x,0.025)))
-
-        # Table of repeatabilities
-            Rs_guich <- cbind(R = R_mean_guich, l = R_l95_guich[,2], u = R_u95_guich[,2])
-            Rs_guich
+        saveRDS(guich_mv, file = "./output/models/guich_mv.rds")
+        } else {
+           guich_mv <- readRDS("./output/models/guich_mv.rds")
+        }
+        
 
 ############################################
 # Repeatability
@@ -428,9 +398,9 @@ summary (memerge1g)
         sigma_deli <- posterior_deli[,grep("sigma", colnames(posterior_deli))]
 
     # Calculate the repeatability of each trait. Note the trait name needs to match how it's stored in brms
-    R_deli_speed_burst <- r(id_deli, clutch_deli, sigma_deli, trait = "logspeed_burst")
-     R_deli_timeemerge <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "Time_emerge_sec")
-        R_deli_speed1m <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "logspeed_1m")
+    R_deli_speed_burst <- repeatability(id_sd = id_deli, clutch_sd = clutch_deli, sigma_sd = sigma_deli, trait = "logspeedburst")
+     R_deli_timeemerge <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "logTimeemergesec")
+        R_deli_speed1m <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "logspeed1m")
       R_deli_timesnout <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "logTimeSnout")
        R_deli_distmove <- repeatability(id_deli, clutch_deli, sigma_deli, trait = "Distancemoved")
 
@@ -460,6 +430,7 @@ summary (memerge1g)
 
 ############################################
 # Bayesian Multivariate models - Part II
+# Models controling for z_svl
 ############################################
 
 # The interaction models first. 
@@ -470,7 +441,7 @@ summary (memerge1g)
        speed_burst_per_int <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
 
     # Delicata
-    if(rerun){
+      if(rerun){
         
         deli_behav_int <- brms::brm(tim_emerge_ap_int + tim_snout_ap_int + dist_move_ap_int + speed_per_int + speed_burst_per_int + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, data = dat2, control = list(adapt_delta = 0.98))
 
@@ -529,52 +500,22 @@ summary (memerge1g)
 
 ############################################
 # Bayesian Multivariate models - Part III
+# Models without controlling for z_svl
 ############################################
 
-    # The main effects models
-        tim_emerge_ap_main  <- bf(Time_emerge_sec    | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-         tim_snout_ap_main  <- bf(Time_snout_sec     | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-         dist_move_ap_main  <- bf(Distance.moved     | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-             speed_per_main <- bf(logspeed_1m        | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-       speed_burst_per_main <- bf(logspeed_burst     | mi() ~ 1 + temp + egg_treat + z_svl + (1|q|id) + (1|clutch)) + gaussian()
-
-    # Delicata
-        deli_behav_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_main", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
-        deli_behav_main
-    
-    # Guichenoti
-        guich_mv_main <- brms::brm(tim_emerge_ap_main + tim_snout_ap_main + dist_move_ap_main + speed_per_main + speed_burst_per_main + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_main", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
-        guich_mv_main
-
-        ####################################
-        # Bayesian Multivariate models - Part IV
-        #Repeating models of behaviour without controlling for SVL
-        ####################################
-        
     # Deli
-        # 2-way
-        
-        tim_emerge_ap_int1  <- bf(Time_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        tim_snout_ap_int1  <- bf(Time_snout_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        dist_move_ap_int1  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        speed_per_int1 <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+         tim_emerge_ap_int1  <- bf(Time_emerge_sec    | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+          tim_snout_ap_int1  <- bf(Time_snout_sec     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+          dist_move_ap_int1  <- bf(Distance.moved     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
+              speed_per_int1 <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int1 <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
         
-  
-        deli_behav_int_nonSVL <- brms::brm(tim_emerge_ap_int1 + tim_snout_ap_int1 + dist_move_ap_int1 + speed_per_int1 + speed_burst_per_int1 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_int_nonSVL", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
-        
-        deli_behav_int_nonSVL  
-        
-        #main model
-        tim_emerge_ap_int1  <- bf(Time_emerge_sec    | mi() ~ 1 + temp + egg_treat  + (1|q|id) + (1|clutch)) + gaussian()
-        tim_snout_ap_int1  <- bf(Time_snout_sec    | mi() ~ 1 + temp + egg_treat  + (1|q|id) + (1|clutch)) + gaussian()
-        dist_move_ap_int1  <- bf(Distance.moved     | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        speed_per_int1 <- bf(logspeed_1m        | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        speed_burst_per_int1 <- bf(logspeed_burst     | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        
-        
-        deli_behav_main_nonSVL <- brms::brm(tim_emerge_ap_int1 + tim_snout_ap_int1 + dist_move_ap_int1 + speed_per_int1 + speed_burst_per_int1 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_main_nonSVL", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
-        deli_behav_main_nonSVL 
+        if(rerun){
+          deli_behav_int_nonSVL <- brms::brm(tim_emerge_ap_int1 + tim_snout_ap_int1 + dist_move_ap_int1 + speed_per_int1 + speed_burst_per_int1 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, file = "output/models/deli_behav_int_nonSVL", file_refit = "on_change", data = dat2, control = list(adapt_delta = 0.98))
+          saveRDS(deli_behav_int_nonSVL, "./output/models/deli_behav_int_nonSVL.rds")
+        } else{
+          deli_behav_int_nonSVL <- readRDS("./output/models/deli_behav_int_nonSVL.rds")
+        }
         
     #Guich
         #2-way
@@ -584,19 +525,13 @@ summary (memerge1g)
         speed_per_int2 <- bf(logspeed_1m        | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
         speed_burst_per_int2 <- bf(logspeed_burst     | mi() ~ 1 + temp*egg_treat + (1|q|id) + (1|clutch)) + gaussian()
         
+        if(rerun){
         guich_mv_int_nonSVL <- brms::brm(tim_emerge_ap_int2 + tim_snout_ap_int2 + dist_move_ap_int2 + speed_per_int2 + speed_burst_per_int2 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_int_nonSVL", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
-        guich_mv_int_nonSVL
-        
-        #main
-        tim_emerge_ap_int2  <- bf(logTime_emerge_sec    | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        tim_snout_ap_int2  <- bf(logTimeSnout    | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        dist_move_ap_int2  <- bf(Distance.moved     | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        speed_per_int2 <- bf(logspeed_1m        | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        speed_burst_per_int2 <- bf(logspeed_burst     | mi() ~ 1 + temp + egg_treat + (1|q|id) + (1|clutch)) + gaussian()
-        
-        guich_mv_main_nonSVL <- brms::brm(tim_emerge_ap_int2 + tim_snout_ap_int2 + dist_move_ap_int2 + speed_per_int2 + speed_burst_per_int2 + set_rescor(TRUE), iter = 4000, warmup = 1000, chains = 4, cores = 4, save_pars = save_pars(), file = "output/models/guich_mv_main_nonSVL", file_refit = "on_change", control = list(adapt_delta = 0.98), data = dat3)
-        guich_mv_main_nonSVL
-                                              
+        saveRDS(guich_mv_int_nonSVL, "./output/models/guich_mv_int_nonSVL.rds")
+        } else{
+          guich_mv_int_nonSVL <- readRDS("./output/models/guich_mv_int_nonSVL.rds")
+        }
+                                                      
 ############################################
 ########### Figures ########################
 ############################################
