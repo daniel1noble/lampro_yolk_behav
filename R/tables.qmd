@@ -88,6 +88,46 @@ source(here::here("R", "func.R"))
 ```
 
 
+```{r, tbl-tbl3}
+#| label: tbl-tbl3
+#| tbl-cap: Posterior means and 95% credible intervals for the between and within-individual correlations among behavioural traits in Lampropholis delicata and Lampropholis guichenoti. Estimates are from a Bayesian multivariate (multi-response) model.
+
+# Load models
+   deli_behav_int_nonSVL <- readRDS(here::here("output/models/", "deli_behav_int_nonSVL.rds"))
+	 guich_mv_int_nonSVL <- readRDS(here::here("output/models/", "guich_mv_int_nonSVL.rds"))
+
+# posteriors for correlations
+	    post_cor_deli_id <- posterior_samples(deli_behav_int_nonSVL, pars = paste0("^cor"))  %>% posterior_summary()   %>% data.frame()
+	post_cor_deli_within <- posterior_samples(deli_behav_int_nonSVL, pars = paste0("^rescor"))  %>% posterior_summary()  %>% data.frame()
+
+	    post_cor_guich_id <- posterior_samples(guich_mv_int_nonSVL, pars = paste0("^cor"))  %>% posterior_summary()  %>% data.frame()
+	post_cor_guich_within <- posterior_samples(guich_mv_int_nonSVL, pars = paste0("^rescor"))  %>% posterior_summary() %>% data.frame()
+
+# labels
+	names <- c("cor(Emergence Time (s), Time Snout Out (s))",
+			   "cor(Emergence Time (s), Distance Moved (cm))",
+			   "cor(Time Snout Out (s), Distance Moved (cm))",
+			   "cor(Emergence Time (s), 1m Speed (cm/s))",
+			   "cor(Time Snout Out (s), 1m Speed (cm/s))",
+			   "cor(Distance Moved (cm), 1m Speed (cm/s))",
+			   "cor(Emergence Time (s), Burst Speed (cm/s))",
+			   "cor(Time Snout Out (s), Burst Speed (cm/s))",
+			   "cor(Distance Moved (cm), Burst Speed (cm/s))",
+			   "cor(1m Speed (cm/s), Burst Speed (cm/s))")
+	species <- c("L. delicata - Between Individual", rep("", 9), "L. delicata - Within Individual", rep("", 9),
+				 "L. guichenoti - Between Individual", rep("", 9), "L. guichenoti - Within Individual", rep("", 9))
+
+# build table
+	table <- data.frame(Species = species,
+						Names = rep(names, 4),
+						Estimate = c(post_cor_deli_id$Estimate, post_cor_deli_within$Estimate, post_cor_guich_id$Estimate, post_cor_guich_within$Estimate),
+						`2.5 %` = c(post_cor_deli_id$Q2.5, post_cor_deli_within$Q2.5, post_cor_guich_id$Q2.5, post_cor_guich_within$Q2.5),
+						`97.5 %` = c(post_cor_deli_id$Q97.5, post_cor_deli_within$Q97.5, post_cor_guich_id$Q97.5, post_cor_guich_within$Q97.5), check.names = FALSE)
+
+# full table
+	flextable(table)  %>% autofit()  %>% align(align = "center", part = "all")  
+```
+
 ```{r, tbl-tblS3}
 #| label: tbl-tblS3
 #| tbl-cap: Posterior means and 95% credible intervals for the interaction between temperature (Temp) and maternal investment (Invest) along with the main effects of temperature and maternal investment on behavioural and performance traits for *Lampropholis delicata* and *Lampropholis guichenoti*. Main effects are pooled posterior means over each level of second predictor variable. Estimates are from a Bayesian multivariate (multi-response) model controlling for SVL (Z-transformed).
