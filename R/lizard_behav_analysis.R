@@ -241,6 +241,15 @@ morph$egg_treat <- as.factor(morph$egg_treat)
         } else{
           dat2  <- read.csv("output/data/dat2.csv")
           dat3  <- read.csv("output/data/dat3.csv")}
+colnames(dat2)[!colnames(dat2) %in% colnames(dat3)]
+# Summarise missing data
+  dat2_deli <- dat2  %>% select(logTime_emerge_sec, logTimeSnout, Distance.moved, logspeed_1m, logspeed_burst) %>% summarise_all(funs((sum(is.na(.))/length(.))*100))
+ dat2_guich <- dat3  %>%  select(logTime_emerge_sec, logTimeSnout, Distance.moved, logspeed_1m, logspeed_burst)  %>% summarise_all(funs((sum(is.na(.))/length(.))*100))
+
+# Missing data Table
+  miss_data <- rbind(dat2_deli, dat2_guich)
+  miss_data <- cbind(species=c("Deli", "Guich"), miss_data)  %>% mutate(across(where(is.numeric), round, 2))
+  write.csv(miss_data, file = "output/tables/miss_data.csv")
 
 #Transformations Maider (deli does no need to log-transform antipredatory behaviours)
     # The model. Intercept only controlling for ID and clutch. Most variables are approximately normal. Missing data will be dealt with during model fitting using data augmentation.
