@@ -241,7 +241,7 @@ morph$egg_treat <- as.factor(morph$egg_treat)
         } else{
           dat2  <- read.csv("output/data/dat2.csv")
           dat3  <- read.csv("output/data/dat3.csv")}
-colnames(dat2)[!colnames(dat2) %in% colnames(dat3)]
+
 # Summarise missing data
   dat2_deli <- dat2  %>% select(logTime_emerge_sec, logTimeSnout, Distance.moved, logspeed_1m, logspeed_burst) %>% summarise_all(funs((sum(is.na(.))/length(.))*100))
  dat2_guich <- dat3  %>%  select(logTime_emerge_sec, logTimeSnout, Distance.moved, logspeed_1m, logspeed_burst)  %>% summarise_all(funs((sum(is.na(.))/length(.))*100))
