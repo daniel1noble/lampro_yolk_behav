@@ -1,4 +1,4 @@
-# lampro_yolk_behav
+# Lampropholis temperature and yolk experiment
 
 Understanding the impact of maternal resource investment and temperature on lizard behaviour and performance 
 
