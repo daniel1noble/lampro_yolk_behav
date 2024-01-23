@@ -26,3 +26,43 @@ filename: `morphol.csv`
 - "Tail" : Tail length (mm) of each lizard       
 - "Total" : Total length (mm) of each lizard. SVL + Tail     
 - "age" : Age, in days, of each lizard
+
+The behaviour and performance data come from merged data files and have a bit more information:
+
+filename: `dat2.csv` and `dat3.csv`
+- "id"	: Unique lizard identity
+- "clutch": Unique clutch identity
+- "day_hatch"
+- "day_photo"
+- "temp" : Temperature treatment of the lizard ("cold" or "hot")  
+- "egg_treat" : Egg treatment of the lizard ("control" or "ablated")
+- "sp" : Species, Deli = *Lampropholis delicata* and Guich = *Lampropholis guichenoti*
+- "mass.hatch" : Weight in grams of each lizard at hatching
+- "SVL_hatch" : Snout-vent length (mm) of each lizard at hatching
+- "Tail_length_hatch" Tail length (mm) of each lizard at hatching
+- "Weigth": Weight in grams of each lizard
+- "Distance.moved": Total distance moved during assay in cm
+- "Time_hide_sec": Time taken for lizard to enter the hide (seconds)
+- "Time_snout_sec" : Time taken for lizard to emerge snout from the hide (seconds)
+- "Time_emerge_sec" : Time taken for lizard to completely emerge from the hide (seconds)
+- "SVL": SVL of lizard at assay time (mm)
+- "Tail": Tail length of lizard at assay time (mm)
+- "Total": Total length of lizard at assay time (mm)
+- "Tail_intact": Binary, did the lizard have an intact tail or did it lose it
+- "day": day of assay
+- "speed_1m_s": 1m sprint speed (m/s)
+- "burst_25cm": fastest 25cm speed (cm/s)
+- "X25fast"
+- "age"	: Age of lizard in days
+- "Notes": any relevant notes
+- "time_tohide":  Time taken for lizard to enter the hide (seconds)
+- "time_hiding":Time taken for lizard to emerge snout from the hide (seconds)
+- "time_active": Time taken for lizard to completely emerge from the hide (seconds)
+- "maternal": Egg treatment of the lizard ("control" or "ablated")
+- "scaleage": Z-transformed age
+- "svldeli": SVL of L delicata
+- "logTimeSnout": Time taken for lizard to emerge snout from the hide (seconds) on a log scale
+- "logspeed_1m":1m sprint speed (m/s) on log scale
+- "logspeed_burst": fastest 25cm speed (cm/s) on log scale
+- "logTime_emerge_sec":  Time taken for lizard to completely emerge from the hide (seconds) on a log scale
+- "z_svl": Z-transformed SVL
